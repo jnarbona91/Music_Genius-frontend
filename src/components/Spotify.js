@@ -31,6 +31,7 @@ export default class Spotify extends React.Component{
   getPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
     .then((resp)=>{
+      console.log(resp)
       this.setState({
         nowPlaying: {
           name: resp.item.name,
@@ -42,6 +43,13 @@ export default class Spotify extends React.Component{
 
   skipSong(){
     spotifyApi.skipToNext()
+    .then((resp)=>{
+      return this.getPlaying()
+    })
+  }
+
+  prevSong(){
+    spotifyApi.skipToPrevious()
     .then((resp)=>{
       return this.getPlaying()
     })
@@ -66,6 +74,11 @@ export default class Spotify extends React.Component{
             <div>
               <button onClick={()=> this.skipSong()}>
                 Skip Song
+              </button>
+            </div>
+            <div>
+              <button onClick={()=> this.prevSong()}>
+              Previous Song
               </button>
             </div>
           </div>
