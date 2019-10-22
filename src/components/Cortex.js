@@ -1,5 +1,5 @@
 import React from "react";
-import Websocket from "react-websocket"; 
+import Websocket from "react-websocket";
 import { Button } from "reactstrap"
 
 
