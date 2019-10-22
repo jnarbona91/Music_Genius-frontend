@@ -58,16 +58,16 @@ export default class Spotify extends React.Component{
         <div>
         { this.state.loggedIn &&
           <div>
-          <div>
-          <button onClick={() => this.getPlaying()}>
-            Check Now Playing
-          </button>
-          </div>
-          <div>
-          <button onClick={()=> this.skipSong()}>
-          Skip Song
-          </button>
-          </div>
+            <div>
+              <button onClick={() => this.getPlaying()}>
+                Check Now Playing
+              </button>
+            </div>
+            <div>
+              <button onClick={()=> this.skipSong()}>
+                Skip Song
+              </button>
+            </div>
           </div>
 
         }
