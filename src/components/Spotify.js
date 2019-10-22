@@ -35,7 +35,7 @@ export default class Spotify extends React.Component{
       this.setState({
         nowPlaying: {
           name: resp.item.name,
-          albumArt: resp.item.album.imgages[0].url
+          albumArt: resp.item.album.images[0].url
         }
       })
     })
@@ -47,7 +47,7 @@ export default class Spotify extends React.Component{
         <div>
           <a href="http://localhost:8888">Link to Spotify</a>
           <div>{this.state.nowPlaying.name}</div>
-          <img src={this.state.nowPlaying.albumArt}/>
+          <img src={this.state.nowPlaying.albumArt} style={{height: '150px', width: '150px'}}/>
         </div>
         <div>
         { this.state.loggedIn &&
