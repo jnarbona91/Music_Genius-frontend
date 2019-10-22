@@ -6,7 +6,6 @@ export default class Spotify extends React.Component{
   constructor(){
     super()
     const params = this.getHashParams()
-    console.log(params)
     const token = params.access_token
     if(token){
       spotifyApi.setAccessToken(token)
@@ -41,19 +40,36 @@ export default class Spotify extends React.Component{
     })
   }
 
+  skipSong(){
+    spotifyApi.skipToNext()
+    .then((resp)=>{
+      return this.getPlaying()
+    })
+  }
+
   render(){
     return(
       <div>
         <div>
           <a href="http://localhost:8888">Link to Spotify</a>
           <div>{this.state.nowPlaying.name}</div>
-          <img src={this.state.nowPlaying.albumArt} style={{height: '150px', width: '150px'}}/>
+          <img alt="album art" src={this.state.nowPlaying.albumArt} style={{height: '150px', width: '150px'}}/>
         </div>
         <div>
         { this.state.loggedIn &&
+          <div>
+          <div>
           <button onClick={() => this.getPlaying()}>
             Check Now Playing
           </button>
+          </div>
+          <div>
+          <button onClick={()=> this.skipSong()}>
+          Skip Song
+          </button>
+          </div>
+          </div>
+
         }
         </div>
       </div>
