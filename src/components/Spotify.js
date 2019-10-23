@@ -13,7 +13,7 @@ export default class Spotify extends React.Component{
     this.state = {
       loggedIn: token ? true : false,
       nowPlaying: { name: 'Not Checked', albumArt: '' },
-      playlist: ""
+      userId: "",
     }
   }
 
@@ -36,7 +36,8 @@ export default class Spotify extends React.Component{
       this.setState({
         nowPlaying: {
           name: resp.item.name,
-          albumArt: resp.item.album.images[0].url
+          albumArt: resp.item.album.images[0].url,
+          userId: resp.device.id
         }
       })
     })
@@ -67,9 +68,18 @@ export default class Spotify extends React.Component{
   }
 
   createNewPlaylist(){
-    spotifyApi.createPlaylist()
+    spotifyApi.createPlaylist('melted_snowman2', { name: "New Playlist"})
     .then((resp)=>{
       console.log(resp)
+    })
+  }
+
+  getUserId(){
+    spotifyApi.getMe()
+    .then((resp)=>{
+      this.setState({
+        userId: resp.is
+      })
     })
   }
 
@@ -90,7 +100,7 @@ export default class Spotify extends React.Component{
               </button>
             </div>
             <div>
-              <button onClick={()=> this.skipSong()}>
+              <button onClick={() => this.skipSong()}>
                 Skip Song
               </button>
             </div>
@@ -105,12 +115,12 @@ export default class Spotify extends React.Component{
               </button>
             </div>
             <div>
-              <button onSubmit={()=> this.createNewPlaylist()}>
+              <button onClick={()=> this.createNewPlaylist()}>
                 Create Playlist
               </button>
             </div>
             <div>
-              <button onClick={()=> this.getCurrentPlaylist()}>
+              <button onClick={()=> this.getUserId()}>
                 Retrieve Playlist
               </button>
             </div>
