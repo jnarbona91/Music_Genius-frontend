@@ -14,10 +14,33 @@ export default class Cortex extends React.Component{
 
     sendHello(){
         let msg = {
-        jsonrpc: "2.0",
-        method: "getCortexInfo",
-        "id":1
+            "jsonrpc": "2.0",
+            "method": "getCortexInfo",
+            "id":1
+            }
+        this.refWebSocket.sendMessage(JSON.stringify(msg));
+    }
+
+    getUserLogin(){
+        let msg = {
+            "jsonrpc": "2.0",
+            "method": "getUserLogin",
+            "id":1
+            }
+        this.refWebSocket.sendMessage(JSON.stringify(msg));
+    }
+
+    getRequestAccess(){
+        let msg = {
+            "id": 1,
+            "jsonrpc": "2.0",
+            "method": "requestAccess",
+            "params": {
+                "clientId": "zrTtgE4m4XN2z74UC5wRXOMEfqqtT20glr0rJf08",
+                "clientSecret": "UyNffuiGrWOIUJfrUrqJeiAbVAsgNm7Tyw58AVbYkKEGI4l5MPzKo56K0vvuoWOjgujx5YNoc6CcJvZxOxgICsAjwsy63AF4gfvq9a68fdvY4YgOzafRXeqjWwAbYymK"
+            }
         }
+
         this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
 
@@ -40,7 +63,10 @@ export default class Cortex extends React.Component{
                 this.refWebSocket = Websocket;
             }}
             />
-             <Button onClick={() => this.sendHello()}>Get Info</Button>
+             {/* this is just for test connecting to api
+             <Button onClick={() => this.sendHello()}>Get Info</Button> */}
+             <Button onClick={() => this.getUserLogin()}>User Login</Button>
+             <Button onClick={() => this.getRequestAccess()}>Request Access</Button>
             </div>
         )
     };
