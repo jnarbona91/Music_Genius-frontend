@@ -12,7 +12,8 @@ export default class Spotify extends React.Component{
     }
     this.state = {
       loggedIn: token ? true : false,
-      nowPlaying: { name: 'Not Checked', albumArt: '' }
+      nowPlaying: { name: 'Not Checked', albumArt: '' },
+      userId: "",
     }
   }
 
@@ -35,29 +36,56 @@ export default class Spotify extends React.Component{
       this.setState({
         nowPlaying: {
           name: resp.item.name,
-          albumArt: resp.item.album.images[0].url
+          albumArt: resp.item.album.images[0].url,
+          userId: resp.device.id
         }
       })
     })
   }
 
+  getCurrentPlaylist(){
+    spotifyApi.getPlaylist()
+    .then((resp)=>{
+      console.log(resp)
+    })
+  }
+
   skipSong(){
     spotifyApi.skipToNext()
-    .then((resp)=>{
       return this.getPlaying()
-    })
   }
 
   prevSong(){
     spotifyApi.skipToPrevious()
-    .then((resp)=>{
       return this.getPlaying()
+  }
+
+  addToPlaylist(){
+    spotifyApi.addTracksToPlaylist()
+    .then((resp)=>{
+      console.log(resp)
+    })
+  }
+
+  createNewPlaylist(){
+    spotifyApi.createPlaylist('melted_snowman2', { name: "New Playlist"})
+    .then((resp)=>{
+      console.log(resp)
+    })
+  }
+
+  getUserId(){
+    spotifyApi.getMe()
+    .then((resp)=>{
+      this.setState({
+        userId: resp.is
+      })
     })
   }
 
   render(){
     return(
-      <div>
+      <div className="spotify-div">
         <div>
           <a href="http://localhost:8888">Link to Spotify</a>
           <div>{this.state.nowPlaying.name}</div>
@@ -72,13 +100,28 @@ export default class Spotify extends React.Component{
               </button>
             </div>
             <div>
-              <button onClick={()=> this.skipSong()}>
+              <button onClick={() => this.skipSong()}>
                 Skip Song
               </button>
             </div>
             <div>
               <button onClick={()=> this.prevSong()}>
               Previous Song
+              </button>
+            </div>
+            <div>
+              <button onClick={()=> this.addToPlaylist()}>
+                Add to Playlist
+              </button>
+            </div>
+            <div>
+              <button onClick={()=> this.createNewPlaylist()}>
+                Create Playlist
+              </button>
+            </div>
+            <div>
+              <button onClick={()=> this.getUserId()}>
+                Retrieve Playlist
               </button>
             </div>
           </div>
