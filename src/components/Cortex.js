@@ -7,7 +7,8 @@ export default class Cortex extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            token: ""
+            token: "",
+            headset: ""
           };
         this.handleData = this.handleData.bind(this);
     }
@@ -62,6 +63,18 @@ export default class Cortex extends React.Component{
         this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
 
+    queryHeadsets(){
+        let msg = {
+            "id": 1,
+            "jsonrpc": "2.0",
+            "method": "queryHeadsets",
+            "params": {
+                "id": "EPOC-*"
+            }
+        };
+        this.refWebSocket.sendMessage(JSON.stringify(msg));
+    }
+
     handleData(data) {
         let result = JSON.parse(data);
         console.log(result);
@@ -70,8 +83,16 @@ export default class Cortex extends React.Component{
             this.state.token = result.result.cortexToken;
             console.log("received token = " + result.result.cortexToken)
           }
+        //   if (result.result.cortexToken != undefined && (this.state.headset === "" || this.state.headset === undefined)) {
+        //       this.state.headset = result.result.
+        //   }
       }
 
+      connectHeadset(){
+          let msg = {
+
+          }
+      }
 
     render() {
         return (
@@ -91,6 +112,8 @@ export default class Cortex extends React.Component{
              <Button onClick={() => this.getUserLogin()}>User Login</Button>
              <Button onClick={() => this.getRequestAccess()}>Request Access</Button>
              <Button onClick={() => this.getAuthentication()}>Authorize</Button>
+           
+             <Button onClick={() => this.queryHeadsets()}>Find Headset</Button>
             </div>
         )
     };
