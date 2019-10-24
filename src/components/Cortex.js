@@ -11,13 +11,14 @@ export default class Cortex extends React.Component{
         this.state = {
             token: "", //storing cortext token for authentication
             method: "", //storing the last request method so we know how to handle the response
-            headset: "" //storing the headset id
+            headset: "", //storing the headset id
+            connected: false
           };
         this.handleData = this.handleData.bind(this);
     }
 
     handleOpen() {
-        console.log("connected");
+        console.log("[DEBUG] connected");
     }
 
     sendHello(){
@@ -91,60 +92,91 @@ export default class Cortex extends React.Component{
         this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
 
-    connectHeadsets(){
-        this.state.method = "controlDevice"
+    connectHeadset(){
+        this.state.method = "controlDevice";
 
-        let msg = {
-            
-                "id": 1,
-                "jsonrpc": "2.0",
-                "method": "controlDevice",
-                "params": {
-                    "command": "connect",
-                    "headset": "EPOC-*"
-                }
-            };
-        this.refWebSocket.sendMessage(JSON.stringify(msg));
+        if (this.state.headset != "")
+        {
+            let msg = {
+                
+                    "id": 1,
+                    "jsonrpc": "2.0",
+                    "method": "controlDevice",
+                    "params": {
+                        "command": "connect",
+                        "headset": this.state.headset
+                    }
+                };
+
+            console.log(msg);
+            this.refWebSocket.sendMessage(JSON.stringify(msg));
+        }
+    }
+
+    disconnectHeadset(){
+        this.state.method = "controlDevice";
+
+        if (this.state.headset != "")
+        {
+            let msg = {
+                
+                    "id": 1,
+                    "jsonrpc": "2.0",
+                    "method": "controlDevice",
+                    "params": {
+                        "command": "disconnect",
+                        "headset": this.state.headset
+                    }
+                };
+                
+            console.log(msg);
+            this.refWebSocket.sendMessage(JSON.stringify(msg));
+        }
     }
     
-
-
     handleData(data) {
         console.log(this.state.method);
         let result = JSON.parse(data);
         console.log(result);
+
+        if (result.result == undefined)
+        {
+            console.log("received error from " + this.state.method + " request, abort...")
+            return;
+        }
+
         switch(this.state.method){
             case "requestAccess":
-                    console.log("Requesting access... please check your cortext app!")
+                    console.log("[DEBUG] Requesting access... please check your cortext app!")
                     break;
             case "authorize":
                     this.state.token = result.result.cortexToken;
-                    console.log("received token = " + result.result.cortexToken)
+                    console.log("[DEBUG] received token = " + result.result.cortexToken)
                     break;
             case "queryHeadsets":
-                if (result.result.length > 0)
-                {
+                if (result.result.length > 0){
                     this.state.headset = result.result[0].id;
-                    console.log("headset id is: " + this.state.headset);
-                }
-                else{
+                    console.log("[DEBUG] headset id is: " + this.state.headset);
+                } else{
                     this.state.headset = "";
-                    console.log("no headsets found");
+                    console.log("[DEBUG] no headsets found");
                 }
-                    
+                break;
+            case "controlDevice":
+                if (result.result.command == "connect"){
+                    console.log("connected!!!");
+                    this.state.connected = true;
+                } else if (result.result.command == "disconnect"){
+                    console.log("disconnected. :(");
+                    this.state.connected = false;
+                } else { //refresh 
+                    console.log("refresh request was called, not sure what we do with that.")
+                }
+
+                console.log(result.result.message);
                 break;
         }
-      }
-
-      controlDevice(command) {
-          let result = JSON.parse(command);
-          console.log(result);
-          if (this.state.headset === "" || this.state.headset === undefined) {
-              this.state.headset = ""
-          }
-      }
-
-     
+      }     
 
     render() {
         return (
@@ -171,7 +203,8 @@ export default class Cortex extends React.Component{
              <br>
              </br>
 
-             <Button onClick={() => this.controlDevice()}>Connect Headset</Button>
+             <Button onClick={() => this.connectHeadset()}>Connect Headset</Button>
+             <Button onClick={() => this.disconnectHeadset()}>Disconnect Headset</Button>
              <h2>Set your sensetivity level</h2>
              
              <Button>Sensetivity Nob</Button>
