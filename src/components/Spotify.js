@@ -18,6 +18,7 @@ export default class Spotify extends React.Component{
     }
   }
 
+  //returns both request and access tokens
   getHashParams(){
     var hashParams = {};
     var e, r = /([^&;=]+)=?([^&;]*)/g
@@ -33,11 +34,8 @@ export default class Spotify extends React.Component{
   getPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
     .then((resp)=>{
-      console.log(resp)
-      console.log(resp.context.uri)
       var str = resp.context.uri
       var result = str.substring(str.indexOf("playlist:") + 9)
-      console.log(result)
       this.setState({
         nowPlaying: {
           name: resp.item.name,
@@ -52,7 +50,7 @@ export default class Spotify extends React.Component{
   getCurrentPlaylist(){
     spotifyApi.getPlaylist(this.state.currentPlaylist)
     .then((resp)=>{
-      console.log(resp)
+      return resp
     })
   }
 
@@ -69,7 +67,7 @@ export default class Spotify extends React.Component{
   addToPlaylist(){
     spotifyApi.addTracksToPlaylist(this.state.currentPlaylist)
     .then((resp)=>{
-      console.log(resp)
+      return resp
     })
   }
 
