@@ -65,6 +65,7 @@ export default class Cortex extends React.Component{
 
         // remove callback from callbacks object
         delete this.state.callbacks[data.id];  
+        this.getRequestAccess();
     }
 
     getRequestAccess(){
@@ -91,6 +92,7 @@ export default class Cortex extends React.Component{
 
         // remove callback from callbacks object
         delete this.state.callbacks[data.id];    
+        this.getAuthentication();
     }
 
     getAuthentication(){
@@ -116,9 +118,11 @@ export default class Cortex extends React.Component{
         console.log(data);
         this.state.token = data.result.cortexToken;
         console.log("[DEBUG] received token = " + this.state.token)
+    
 
         // remove callback from callbacks object
         delete this.state.callbacks[data.id];
+        this.queryHeadsets();
     }
 
     queryHeadsets(){
@@ -149,7 +153,8 @@ export default class Cortex extends React.Component{
         }
         // remove callback from callbacks object
         delete this.state.callbacks[data.id];
-
+        this.connectHeadset();
+    
         
     }
 
@@ -228,7 +233,7 @@ export default class Cortex extends React.Component{
     render() {
         return (
             <div>
-            <h1>Test</h1>
+            
                 <Websocket
             url="wss://localhost:6868"
             onMessage={this.handleData}
@@ -240,17 +245,17 @@ export default class Cortex extends React.Component{
             />
              {/* this is just for test connecting to api
              <Button onClick={() => this.sendHello()}>Get Info</Button> */}
-             <Button onClick={() => this.getUserLogin()}>User Login</Button>
-             <Button onClick={() => this.getRequestAccess()}>Request Access</Button>
+             <Button onClick={() => this.getUserLogin()}>Connect Headset</Button>
+             {/* <Button onClick={() => this.getRequestAccess()}>Request Access</Button>
              <Button onClick={() => this.getAuthentication()}>Authorize</Button>
              <br>
              </br>
            
              <Button onClick={() => this.queryHeadsets()}>Find Headset</Button>
              <br>
-             </br>
+             </br> */}
 
-             <Button onClick={() => this.connectHeadset()}>Connect Headset</Button>
+             {/* <Button onClick={() => this.connectHeadset()}>Connect Headset</Button> */}
              <Button onClick={() => this.disconnectHeadset()}>Disconnect Headset</Button>
              <h2>Set your sensetivity level</h2>
              
