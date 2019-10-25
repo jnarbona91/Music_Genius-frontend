@@ -43,6 +43,7 @@ export default class Cortex extends React.Component{
 
         // remove callback from callbacks object
         delete this.state.callbacks[data.id];
+    
     }
 
 
@@ -57,6 +58,7 @@ export default class Cortex extends React.Component{
             }
         this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
+
     userLogin_callback = (data) => { 
         console.log("Running callback for userLogin()");
         console.log(data);
@@ -90,7 +92,6 @@ export default class Cortex extends React.Component{
         // remove callback from callbacks object
         delete this.state.callbacks[data.id];    
     }
-
 
     getAuthentication(){
         let id = this.state.id_sequence;
@@ -174,7 +175,6 @@ export default class Cortex extends React.Component{
             this.refWebSocket.sendMessage(JSON.stringify(msg));
         }
     }
-    
 
     disconnectHeadset(){
         let id = this.state.id_sequence;
