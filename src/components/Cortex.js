@@ -3,8 +3,6 @@ import Websocket from "react-websocket";
 import { Button } from "reactstrap"
 // import { threadId } from "worker_threads";
 
-
-
 export default class Cortex extends React.Component{
     constructor(props) {
         super(props);
@@ -12,8 +10,11 @@ export default class Cortex extends React.Component{
             token: "", //storing cortext token for authentication
             method: "", //storing the last request method so we know how to handle the response
             headset: "", //storing the headset id
-            connected: false
+            connected: false,
+            id_sequence: 1,  // sequence for websocket calls
+            callbacks: {}  // keys are id_sequence, values are callbacks
           };
+
         this.handleData = this.handleData.bind(this);
     }
 
@@ -22,35 +23,55 @@ export default class Cortex extends React.Component{
     }
 
     sendHello(){
-        this.state.method = "getCortexInfo"
-
+           // Grab the current id_sequence and increment
+           let id = this.state.id_sequence;
+           this.state.id_sequence += 1;
+           this.state.callbacks[id] = this.hello_callback;  // set up our callback
         let msg = {
             "jsonrpc": "2.0",
             "method": "getCortexInfo",
-            "id":1
+            "id":id 
             }
 
         this.refWebSocket.sendMessage(JSON.stringify(msg));
         
     }
 
-    getUserLogin(){
-        this.state.method = "getUserLogin"
+    hello_callback = (data) => { 
+        console.log("Running callback for sendHello()");
+        console.log(data);
 
-        let msg = {
+        // remove callback from callbacks object
+        delete this.state.callbacks[data.id];
+    }
+
+
+    getUserLogin(){
+        let id = this.state.id_sequence;
+        this.state.id_sequence += 1;
+        this.state.callbacks[id] = this.userLogin_callback;
+       let msg = {
             "jsonrpc": "2.0",
             "method": "getUserLogin",
-            "id":1
+            "id":id
             }
         this.refWebSocket.sendMessage(JSON.stringify(msg));
+    }
+    userLogin_callback = (data) => { 
+        console.log("Running callback for userLogin()");
+        console.log(data);
 
+        // remove callback from callbacks object
+        delete this.state.callbacks[data.id];  
     }
 
     getRequestAccess(){
-        this.state.method = "requestAccess"
+        let id = this.state.id_sequence;
+        this.state.id_sequence += 1;
+        this.state.callbacks[id] = this.requestAccess_callback;
 
         let msg = {
-            "id": 1,
+            "id":id,
             "jsonrpc": "2.0",
             "method": "requestAccess",
             "params": {
@@ -62,11 +83,22 @@ export default class Cortex extends React.Component{
         this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
 
+    requestAccess_callback = (data) => { 
+        console.log("[DEBUG] Requesting access... please check your cortext app!");
+        console.log(data);
+
+        // remove callback from callbacks object
+        delete this.state.callbacks[data.id];    
+    }
+
+
     getAuthentication(){
-        this.state.method = "authorize"
-        
+        let id = this.state.id_sequence;
+        this.state.id_sequence += 1;
+        this.state.callbacks[id] = this.authentication_callback;
+
         let msg = {
-            "id": 1,
+            "id": id,
             "jsonrpc": "2.0",
             "method": "authorize",
             "params": {
@@ -78,11 +110,23 @@ export default class Cortex extends React.Component{
         this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
 
+    authentication_callback = (data) => {   
+        console.log("Running callback for authentication()");
+        console.log(data);
+        this.state.token = data.result.cortexToken;
+        console.log("[DEBUG] received token = " + this.state.token)
+
+        // remove callback from callbacks object
+        delete this.state.callbacks[data.id];
+    }
+
     queryHeadsets(){
-        this.state.method = "queryHeadsets"
+        let id = this.state.id_sequence;
+           this.state.id_sequence += 1;
+           this.state.callbacks[id] = this.queryHeadsets_callback;
 
         let msg = {
-            "id": 1,
+            "id": id,
             "jsonrpc": "2.0",
             "method": "queryHeadsets",
             "params": {
@@ -92,14 +136,32 @@ export default class Cortex extends React.Component{
         this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
 
+    queryHeadsets_callback = (data) => { 
+        console.log("Running callback for queryHeadset()");
+        console.log(data);
+        if (data.result.length > 0){
+            this.state.headset = data.result[0].id;
+            console.log("[DEBUG] headset id is: " + this.state.headset);
+        } else{
+            this.state.headset = "";
+            console.log("[DEBUG] no headsets found");
+        }
+        // remove callback from callbacks object
+        delete this.state.callbacks[data.id];
+
+        
+    }
+
     connectHeadset(){
-        this.state.method = "controlDevice";
+        let id = this.state.id_sequence;
+        this.state.id_sequence += 1;
+        this.state.callbacks[id] = this.controlDevice_callback;
 
         if (this.state.headset != "")
         {
             let msg = {
                 
-                    "id": 1,
+                    "id":id,
                     "jsonrpc": "2.0",
                     "method": "controlDevice",
                     "params": {
@@ -112,15 +174,18 @@ export default class Cortex extends React.Component{
             this.refWebSocket.sendMessage(JSON.stringify(msg));
         }
     }
+    
 
     disconnectHeadset(){
-        this.state.method = "controlDevice";
+        let id = this.state.id_sequence;
+           this.state.id_sequence += 1;
+           this.state.callbacks[id] = this.controlDevice_callback;
 
         if (this.state.headset != "")
         {
             let msg = {
                 
-                    "id": 1,
+                    "id":id,
                     "jsonrpc": "2.0",
                     "method": "controlDevice",
                     "params": {
@@ -134,49 +199,31 @@ export default class Cortex extends React.Component{
         }
     }
     
+    controlDevice_callback = (data) => { 
+        console.log("Running callback for connest and disconnet()");
+        console.log(data);
+        if (data.result.command == "connect"){
+            console.log("connected!!!");
+            this.state.connected = true;
+        } else if (data.result.command == "disconnect"){
+            console.log("disconnected. :(");
+            this.state.connected = false;
+        } else { //refresh 
+            console.log("refresh request was called, not sure what we do with that.")
+        }
+
+        // remove callback from callbacks object
+        delete this.state.callbacks[data.id];  
+    }
+
     handleData(data) {
-        console.log(this.state.method);
+        // console.log(this.state.method);
         let result = JSON.parse(data);
         console.log(result);
 
-        if (result.result == undefined)
-        {
-            console.log("received error from " + this.state.method + " request, abort...")
-            return;
-        }
-
-        switch(this.state.method){
-            case "requestAccess":
-                    console.log("[DEBUG] Requesting access... please check your cortext app!")
-                    break;
-            case "authorize":
-                    this.state.token = result.result.cortexToken;
-                    console.log("[DEBUG] received token = " + result.result.cortexToken)
-                    break;
-            case "queryHeadsets":
-                if (result.result.length > 0){
-                    this.state.headset = result.result[0].id;
-                    console.log("[DEBUG] headset id is: " + this.state.headset);
-                } else{
-                    this.state.headset = "";
-                    console.log("[DEBUG] no headsets found");
-                }
-                break;
-            case "controlDevice":
-                if (result.result.command == "connect"){
-                    console.log("connected!!!");
-                    this.state.connected = true;
-                } else if (result.result.command == "disconnect"){
-                    console.log("disconnected. :(");
-                    this.state.connected = false;
-                } else { //refresh 
-                    console.log("refresh request was called, not sure what we do with that.")
-                }
-
-                console.log(result.result.message);
-                break;
-        }
-      }     
+        // call the registered callback
+        this.state.callbacks[result.id](result);
+    }
 
     render() {
         return (
