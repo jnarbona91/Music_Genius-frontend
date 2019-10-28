@@ -12,7 +12,7 @@ export default class Spotify extends React.Component{
     }
     this.state = {
       loggedIn: token ? true : false,
-      nowPlaying: { name: 'Not Checked', albumArt: '' },
+      nowPlaying: { name: 'Not Checked', albumArt: '', uri: '' },
       userId: "",
       currentPlaylist: ""
     }
@@ -36,14 +36,17 @@ export default class Spotify extends React.Component{
     .then((resp)=>{
       var str = resp.context.uri
       var result = str.substring(str.indexOf("playlist:") + 9)
+      var song = resp.item.uri
       this.setState({
         nowPlaying: {
           name: resp.item.name,
           albumArt: resp.item.album.images[0].url,
           userId: resp.device.id,
+          uri: song
         },
         currentPlaylist: result
       })
+      console.log(resp)
     })
   }
 
@@ -65,9 +68,9 @@ export default class Spotify extends React.Component{
   }
 
   addToPlaylist(){
-    spotifyApi.addTracksToPlaylist(this.state.currentPlaylist)
+    spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     .then((resp)=>{
-      return resp
+      console.log(resp)
     })
   }
 
@@ -88,6 +91,7 @@ export default class Spotify extends React.Component{
   }
 
   render(){
+    console.log(this.state.currentPlaylist)
     return(
       <div className="spotify-div">
         <div>
