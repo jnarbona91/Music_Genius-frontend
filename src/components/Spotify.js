@@ -3,8 +3,8 @@ import SpotifyWebApi from 'spotify-web-api-js'
 const spotifyApi = new SpotifyWebApi()
 
 export default class Spotify extends React.Component{
-  constructor(){
-    super()
+  constructor(props){
+    super(props)
     const params = this.getHashParams()
     const token = params.access_token
     if(token){
@@ -17,7 +17,6 @@ export default class Spotify extends React.Component{
       currentPlaylist: ""
     }
   }
-
   //returns both request and access tokens
   getHashParams(){
     var hashParams = {};
@@ -67,11 +66,53 @@ export default class Spotify extends React.Component{
       return this.getPlaying()
   }
 
-  addToPlaylist(){
-    spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
-    .then((resp)=>{
-      console.log(resp)
-    })
+  excPlaylist(){
+    const { exc } = this.props
+    if(exc >= .6){
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
+    }
+  }
+
+  engPlaylist(){
+    const { eng } = this.props
+    if(eng >= .6){
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
+    }
+  }
+
+  strPlaylist(){
+    const { str } = this.props
+    if(str >= .6){
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
+    }
+  }
+
+  relPlaylist(){
+    const { rel } = this.props
+    if(rel >= .6){
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
+    }
+  }
+
+  intPlaylist(){
+    const { int } = this.props
+    if(int >= .6){
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
+    }
+  }
+
+  focPlaylist(){
+    const { foc } = this.props
+    if(foc >= .6){
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
+    }
+  }
+
+  excPlaylist(){
+    const { eng, exc, str, rel, int, foc } = this.props
+    if(exc >= .6){
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
+    }
   }
 
   createNewPlaylist(){
@@ -118,7 +159,7 @@ export default class Spotify extends React.Component{
               </button>
             </div>
             <div>
-              <button onClick={()=> this.addToPlaylist()}>
+              <button onClick={()=> this.excPlaylist()}>
                 Add to Playlist
               </button>
             </div>

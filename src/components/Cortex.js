@@ -2,6 +2,7 @@ import React from "react";
 import Websocket from "react-websocket";
 import { Button } from "reactstrap"
 // import { threadId } from "worker_threads";
+import Spotify from './Spotify'
 
 export default class Cortex extends React.Component{
     constructor(props) {
@@ -12,7 +13,13 @@ export default class Cortex extends React.Component{
             headset: "", //storing the headset id
             connected: false,
             id_sequence: 1,  // sequence for websocket calls
-            callbacks: {}  // keys are id_sequence, values are callbacks
+            callbacks: {},  // keys are id_sequence, values are callbacks
+            eng: "",
+            exc: "",
+            str: "",
+            rel: "",
+            int: "",
+            foc: ""
           };
 
         this.handleData = this.handleData.bind(this);
@@ -30,20 +37,20 @@ export default class Cortex extends React.Component{
         let msg = {
             "jsonrpc": "2.0",
             "method": "getCortexInfo",
-            "id":id 
+            "id":id
             }
 
         this.refWebSocket.sendMessage(JSON.stringify(msg));
-        
+
     }
 
-    hello_callback = (data) => { 
+    hello_callback = (data) => {
         console.log("Running callback for sendHello()");
         console.log(data);
 
         // remove callback from callbacks object
         delete this.state.callbacks[data.id];
-    
+
     }
 
 
@@ -59,12 +66,12 @@ export default class Cortex extends React.Component{
         this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
 
-    userLogin_callback = (data) => { 
+    userLogin_callback = (data) => {
         console.log("Running callback for userLogin()");
         console.log(data);
 
         // remove callback from callbacks object
-        delete this.state.callbacks[data.id];  
+        delete this.state.callbacks[data.id];
         this.getRequestAccess();
     }
 
@@ -86,12 +93,12 @@ export default class Cortex extends React.Component{
         this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
 
-    requestAccess_callback = (data) => { 
+    requestAccess_callback = (data) => {
         console.log("[DEBUG] Requesting access... please check your cortext app!");
         console.log(data);
 
         // remove callback from callbacks object
-        delete this.state.callbacks[data.id];    
+        delete this.state.callbacks[data.id];
         this.getAuthentication();
     }
 
@@ -113,12 +120,12 @@ export default class Cortex extends React.Component{
         this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
 
-    authentication_callback = (data) => {   
+    authentication_callback = (data) => {
         console.log("Running callback for authentication()");
         console.log(data);
         this.state.token = data.result.cortexToken;
         console.log("[DEBUG] received token = " + this.state.token)
-    
+
 
         // remove callback from callbacks object
         delete this.state.callbacks[data.id];
@@ -141,7 +148,7 @@ export default class Cortex extends React.Component{
         this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
 
-    queryHeadsets_callback = (data) => { 
+    queryHeadsets_callback = (data) => {
         console.log("Running callback for queryHeadset()");
         console.log(data);
         if (data.result.length > 0){
@@ -154,8 +161,8 @@ export default class Cortex extends React.Component{
         // remove callback from callbacks object
         delete this.state.callbacks[data.id];
         this.connectHeadset();
-    
-        
+
+
     }
 
     connectHeadset(){
@@ -166,7 +173,7 @@ export default class Cortex extends React.Component{
         if (this.state.headset != "")
         {
             let msg = {
-                
+
                     "id":id,
                     "jsonrpc": "2.0",
                     "method": "controlDevice",
@@ -189,7 +196,7 @@ export default class Cortex extends React.Component{
         if (this.state.headset != "")
         {
             let msg = {
-                
+
                     "id":id,
                     "jsonrpc": "2.0",
                     "method": "controlDevice",
@@ -198,13 +205,13 @@ export default class Cortex extends React.Component{
                         "headset": this.state.headset
                     }
                 };
-                
+
             console.log(msg);
             this.refWebSocket.sendMessage(JSON.stringify(msg));
         }
     }
-    
-    controlDevice_callback = (data) => { 
+
+    controlDevice_callback = (data) => {
         console.log("Running callback for connest and disconnet()");
         console.log(data);
         if (data.result.command == "connect"){
@@ -213,12 +220,12 @@ export default class Cortex extends React.Component{
         } else if (data.result.command == "disconnect"){
             console.log("disconnected. :(");
             this.state.connected = false;
-        } else { //refresh 
+        } else { //refresh
             console.log("refresh request was called, not sure what we do with that.")
         }
 
         // remove callback from callbacks object
-        delete this.state.callbacks[data.id];  
+        delete this.state.callbacks[data.id];
     }
 
     handleData(data) {
@@ -233,7 +240,7 @@ export default class Cortex extends React.Component{
     render() {
         return (
             <div>
-            
+
                 <Websocket
             url="wss://localhost:6868"
             onMessage={this.handleData}
@@ -250,7 +257,7 @@ export default class Cortex extends React.Component{
              <Button onClick={() => this.getAuthentication()}>Authorize</Button>
              <br>
              </br>
-           
+
              <Button onClick={() => this.queryHeadsets()}>Find Headset</Button>
              <br>
              </br> */}
@@ -258,8 +265,9 @@ export default class Cortex extends React.Component{
              {/* <Button onClick={() => this.connectHeadset()}>Connect Headset</Button> */}
              <Button onClick={() => this.disconnectHeadset()}>Disconnect Headset</Button>
              <h2>Set your sensetivity level</h2>
-             
+
              <Button>Sensetivity Nob</Button>
+             <Spotify eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc}/>
             </div>
         )
     };
