@@ -14,7 +14,8 @@ export default class Spotify extends React.Component{
       loggedIn: token ? true : false,
       nowPlaying: { name: 'Not Checked', albumArt: '', uri: '' },
       userId: "",
-      currentPlaylist: ""
+      currentPlaylist: "",
+      playlistSongs: [],
     }
   }
   //returns both request and access tokens
@@ -33,7 +34,7 @@ export default class Spotify extends React.Component{
   getPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
     .then((resp)=>{
-      var str = resp.context.uri
+      var str = resp.item.uri
       var result = str.substring(str.indexOf("playlist:") + 9)
       var song = resp.item.uri
       this.setState({
@@ -43,9 +44,9 @@ export default class Spotify extends React.Component{
           userId: resp.device.id,
           uri: song
         },
-        currentPlaylist: result
+        currentPlaylist: result,
       })
-      console.log(resp)
+      console.log(song)
     })
   }
 
@@ -131,8 +132,21 @@ export default class Spotify extends React.Component{
     })
   }
 
+  playlistTracks(){
+    spotifyApi.getPlaylistTracks("5TOheLold9VEiIUcljAQlK")
+    .then((resp)=>{
+      resp.items.map((song)=>{
+        return this.state.playlistSongs.push(song.track.name)
+      })
+    })
+  }
+
+  componentDidMount(){
+    this.playlistTracks()
+  }
+
   render(){
-    console.log(this.state.currentPlaylist)
+    console.log(this.state.playlistSongs)
     return(
       <div className="spotify-div">
         <div>
