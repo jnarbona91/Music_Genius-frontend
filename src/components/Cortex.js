@@ -3,6 +3,8 @@ import Websocket from "react-websocket";
 import { Button } from "reactstrap"
 // import { threadId } from "worker_threads";
 import Spotify from './Spotify'
+import { tsImportEqualsDeclaration } from "@babel/types";
+import { connectableObservableDescriptor } from "rxjs/internal/observable/ConnectableObservable";
 
 export default class Cortex extends React.Component{
     constructor(props) {
@@ -14,6 +16,8 @@ export default class Cortex extends React.Component{
             connected: false,
             id_sequence: 1,  // sequence for websocket calls
             callbacks: {},  // keys are id_sequence, values are callbacks
+            session_id: "",
+            session_connected: false, 
             eng: "",
             exc: "",
             str: "",
@@ -231,14 +235,99 @@ export default class Cortex extends React.Component{
         // remove callback from callbacks object
         delete this.state.callbacks[data.id];
     }
+    startSession(){
+        let id = this.state.id_sequence;
+            this.state.id_sequence += 1;
+            this.state.callbacks[id] = this.startSession_callback;
+        let msg = {
+            "id": id,
+            "jsonrpc": "2.0",
+            "method": "createSession",
+            "params": {
+                "cortexToken": this.state.token,
+                "headset": this.state.headset,
+                "status": "active"
+            }
+        };
+        this.refWebSocket.sendMessage(JSON.stringify(msg)); 
+    }
 
+    startSession_callback = (data) => {
+
+        console.log("Running callback for startSession()");
+        console.log(data);
+        if (data.error){
+            console.log("error starting session: " + data.error.message);
+        } else {
+            this.state.session_id = data.result.id;
+            this.state.session_connected = true;
+            console.log(`Session id is ${this.state.session_id}`);
+        }
+      
+    }
+
+    // querySession(){
+    //     let id = this.state.id_sequence;
+    //         this.state.id_sequence += 1;
+    //         this.state.callbacks[id] = this.querySession_callback;
+    //     let msg = {
+    //         "id": id,
+    //         "jsonrpc": "2.0",
+    //         "method": "querySessions",
+    //         "params": {
+    //             "cortexToken": this.state.token
+    //         }
+    //     };
+    //     this.refWebSocket.sendMessage(JSON.stringify(msg)); 
+    // }
+
+    // querySession_callback = (data) => {
+
+    //     console.log("Running callback for querySession()");
+    //     console.log(data);
+    // }
+
+    closeSession(){
+        if (this.state.session_connected == true){
+        let id = this.state.id_sequence;
+            this.state.id_sequence += 1;
+            this.state.callbacks[id] = this.closeSession_callback;
+        let msg = {
+            "id": id,
+            "jsonrpc": "2.0",
+            "method": "updateSession",
+            "params": {
+                "cortexToken": this.state.token,
+                "session": this.state.session_id,
+                "status": "close"
+    }
+
+            
+        };
+        this.refWebSocket.sendMessage(JSON.stringify(msg)); 
+    } else {
+        console.log("There is currently no active session");
+    }
+}
+
+    closeSession_callback = (data) => {
+        console.log("Running callback for closeSession()");
+        console.log(data);
+
+        this.state.session_connected = false;
+    }
+
+    
     handleData(data) {
         // console.log(this.state.method);
         let result = JSON.parse(data);
         console.log(result);
-
-        // call the registered callback
-        this.state.callbacks[result.id](result);
+        if (result.id){
+            // call the registered callback
+            console.log("executing callback for id = " + result.id);
+            this.state.callbacks[result.id](result);
+        }
+        
     }
 
     render() {
@@ -268,6 +357,10 @@ export default class Cortex extends React.Component{
 
              {/* <Button onClick={() => this.connectHeadset()}>Connect Headset</Button> */}
              <Button onClick={() => this.disconnectHeadset()}>Disconnect Headset</Button>
+            <br>
+            </br>
+            <Button onClick={() => this.startSession()}>Start Session</Button>
+            <Button onClick={() => this.closeSession()}>End Session</Button>
              <h2>Set your sensetivity level</h2>
 
              <Button>Sensetivity Nob</Button>
