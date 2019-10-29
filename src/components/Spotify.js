@@ -17,6 +17,7 @@ export default class Spotify extends React.Component{
       currentPlaylist: "",
       playlistSongs: [],
       duration: "",
+      error: null,
     }
   }
   //returns both request and access tokens
@@ -49,6 +50,7 @@ export default class Spotify extends React.Component{
       })
       console.log(resp)
     })
+    .catch((error)=> this.setState({error}))
   }
 
   getCurrentPlaylist(){
@@ -122,6 +124,7 @@ export default class Spotify extends React.Component{
     .then((resp)=>{
       console.log(resp)
     })
+    .catch((error)=> this.setState({error}))
   }
 
   getUserId(){
@@ -131,6 +134,7 @@ export default class Spotify extends React.Component{
         userId: resp.is
       })
     })
+    .catch((error)=> this.setState({error}))
   }
 
   playlistTracks(){
@@ -140,6 +144,7 @@ export default class Spotify extends React.Component{
         return this.state.playlistSongs.push(song.track.name)
       })
     })
+    .catch((error)=> this.setState({error}))
   }
 
   // getCurrentTrack(){
@@ -157,6 +162,8 @@ export default class Spotify extends React.Component{
       setInterval(()=> this.getPlaying(), timer + 10)
       console.log(timer)
     })
+    .catch((error)=> this.setState({error}))
+
   }
 
   render(){
