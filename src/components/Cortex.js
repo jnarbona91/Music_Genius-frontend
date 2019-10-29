@@ -18,6 +18,7 @@ export default class Cortex extends React.Component{
             callbacks: {},  // keys are id_sequence, values are callbacks
             session_id: "",
             session_connected: false, 
+            all_streams: ["eeg", "mot", "dev", "pow", "met", "com",  "fac", "sys"],
             eng: "",
             exc: "",
             str: "",
@@ -262,8 +263,9 @@ export default class Cortex extends React.Component{
             this.state.session_id = data.result.id;
             this.state.session_connected = true;
             console.log(`Session id is ${this.state.session_id}`);
+            this.subscribe();
         }
-      
+        delete this.state.callbacks[data.id];
     }
 
     // querySession(){
@@ -285,6 +287,7 @@ export default class Cortex extends React.Component{
 
     //     console.log("Running callback for querySession()");
     //     console.log(data);
+    // delete this.state.callbacks[data.id];
     // }
 
     closeSession(){
@@ -315,8 +318,58 @@ export default class Cortex extends React.Component{
         console.log(data);
 
         this.state.session_connected = false;
+        delete this.state.callbacks[data.id];
+    }
+// streams has default value of all streams; if user does not specify streams, all_streams will be subscribed
+    subscribe(streams = this.state.all_streams){
+        if (this.state.connected == true && this.state.session_connected == true){
+        let id = this.state.id_sequence;
+            this.state.id_sequence += 1;
+            this.state.callbacks[id] = this.subscribe_callback;
+        let msg = {
+                "id": id,
+                "jsonrpc": "2.0",
+                "method": "subscribe",
+                "params": {
+                    "cortexToken": this.state.token,
+                    "session": this.state.session_id,
+                    "streams": streams
+                }
+            };
+        this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
 
+}
+subscribe_callback = (data) => {
+    console.log("Running callback for subscribe()");
+    console.log(data);
+    delete this.state.callbacks[data.id];
+}
+
+unsubscribe(){
+    if (this.state.connected == true && this.state.session_connected == true){
+    let id = this.state.id_sequence;
+        this.state.id_sequence += 1;
+        this.state.callbacks[id] = this.unsubscribe_callback;
+    let msg = {
+            "id": id,
+            "jsonrpc": "2.0",
+            "method": "unsubscribe",
+            "params": {
+                "cortexToken": this.state.token,
+                "session": this.state.session_id,
+                "streams": this.state.all_streams
+            }
+        };
+    this.refWebSocket.sendMessage(JSON.stringify(msg));
+}
+
+}
+unsubscribe_callback = (data) => {
+console.log("Running callback for unsubscribe()");
+console.log(data);
+delete this.state.callbacks[data.id];
+}
     
     handleData(data) {
         // console.log(this.state.method);
