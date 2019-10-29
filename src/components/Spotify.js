@@ -16,6 +16,7 @@ export default class Spotify extends React.Component{
       userId: "",
       currentPlaylist: "",
       playlistSongs: [],
+      duration: "",
     }
   }
   //returns both request and access tokens
@@ -46,7 +47,7 @@ export default class Spotify extends React.Component{
         },
         currentPlaylist: result,
       })
-      console.log(song)
+      console.log(resp)
     })
   }
 
@@ -141,12 +142,24 @@ export default class Spotify extends React.Component{
     })
   }
 
+  // getCurrentTrack(){
+  //   spotifyApi.getMyCurrentPlayingTrack()
+  //   .then((resp)=>{
+  //     this.setState({duration: resp.item.duration_ms})
+  //   })
+  // }
+
   componentDidMount(){
-    this.playlistTracks()
+    this.getPlaying();
+    spotifyApi.getMyCurrentPlaybackState()
+    .then((resp)=>{
+      let timer = resp.item.duration_ms - resp.progress_ms
+      setInterval(()=> this.getPlaying(), timer + 10)
+      console.log(timer)
+    })
   }
 
   render(){
-    console.log(this.state.playlistSongs)
     return(
       <div className="spotify-div">
         <div>
