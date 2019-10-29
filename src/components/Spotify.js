@@ -14,7 +14,9 @@ export default class Spotify extends React.Component{
       loggedIn: token ? true : false,
       nowPlaying: { name: 'Not Checked', albumArt: '', uri: '' },
       userId: "",
-      currentPlaylist: ""
+      currentPlaylist: "",
+      playlistSongs: [],
+      duration: "",
     }
   }
   //returns both request and access tokens
@@ -33,7 +35,7 @@ export default class Spotify extends React.Component{
   getPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
     .then((resp)=>{
-      var str = resp.context.uri
+      var str = resp.item.uri
       var result = str.substring(str.indexOf("playlist:") + 9)
       var song = resp.item.uri
       this.setState({
@@ -43,7 +45,7 @@ export default class Spotify extends React.Component{
           userId: resp.device.id,
           uri: song
         },
-        currentPlaylist: result
+        currentPlaylist: result,
       })
       console.log(resp)
     })
@@ -131,8 +133,33 @@ export default class Spotify extends React.Component{
     })
   }
 
+  playlistTracks(){
+    spotifyApi.getPlaylistTracks("5TOheLold9VEiIUcljAQlK")
+    .then((resp)=>{
+      resp.items.map((song)=>{
+        return this.state.playlistSongs.push(song.track.name)
+      })
+    })
+  }
+
+  // getCurrentTrack(){
+  //   spotifyApi.getMyCurrentPlayingTrack()
+  //   .then((resp)=>{
+  //     this.setState({duration: resp.item.duration_ms})
+  //   })
+  // }
+
+  componentDidMount(){
+    this.getPlaying();
+    spotifyApi.getMyCurrentPlaybackState()
+    .then((resp)=>{
+      let timer = resp.item.duration_ms - resp.progress_ms
+      setInterval(()=> this.getPlaying(), timer + 10)
+      console.log(timer)
+    })
+  }
+
   render(){
-    console.log(this.state.currentPlaylist)
     return(
       <div className="spotify-div">
         <div>
