@@ -189,25 +189,29 @@ export default class Cortex extends React.Component{
     }
 
     disconnectHeadset(){
-        let id = this.state.id_sequence;
-           this.state.id_sequence += 1;
-           this.state.callbacks[id] = this.controlDevice_callback;
+        if (this.state.connected == true){ //check if app is actually connected
+            let id = this.state.id_sequence;
+            this.state.id_sequence += 1;
+            this.state.callbacks[id] = this.controlDevice_callback;
 
-        if (this.state.headset != "")
-        {
-            let msg = {
+            if (this.state.headset != "")
+            {
+                let msg = {
 
-                    "id":id,
-                    "jsonrpc": "2.0",
-                    "method": "controlDevice",
-                    "params": {
-                        "command": "disconnect",
-                        "headset": this.state.headset
-                    }
-                };
+                        "id":id,
+                        "jsonrpc": "2.0",
+                        "method": "controlDevice",
+                        "params": {
+                            "command": "disconnect",
+                            "headset": this.state.headset
+                        }
+                    };
 
-            console.log(msg);
-            this.refWebSocket.sendMessage(JSON.stringify(msg));
+                console.log(msg);
+                this.refWebSocket.sendMessage(JSON.stringify(msg));
+            }
+        } else {
+            console.log("Already disconnected, please connect first!")
         }
     }
 
