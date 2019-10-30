@@ -3,6 +3,7 @@ import Websocket from "react-websocket";
 import { Button } from "reactstrap"
 // import { threadId } from "worker_threads";
 import Spotify from './Spotify'
+import Graph from './Graph'
 import { tsImportEqualsDeclaration } from "@babel/types";
 import { connectableObservableDescriptor } from "rxjs/internal/observable/ConnectableObservable";
 
@@ -403,6 +404,7 @@ export default class Cortex extends React.Component{
 
              <Button>Sensetivity Nob</Button>
              <Spotify eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions}/>
+             <Graph eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions}/>
             </div>
         )
     };

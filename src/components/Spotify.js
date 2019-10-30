@@ -161,7 +161,7 @@ export default class Spotify extends React.Component{
     this.getPlaying();
     spotifyApi.getMyCurrentPlaybackState()
     .then((resp)=>{
-      setInterval(()=> this.componentDidMount(), this.state.timer)
+      setInterval(()=> this.componentDidMount(), 1200000)
       console.log(this.state.timer)
     })
     .catch((error)=> this.setState({error}))
