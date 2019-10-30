@@ -18,6 +18,7 @@ export default class Spotify extends React.Component{
       playlistSongs: [],
       duration: "",
       error: null,
+      timer: ""
     }
   }
   //returns both request and access tokens
@@ -36,6 +37,7 @@ export default class Spotify extends React.Component{
   getPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
     .then((resp)=>{
+      let timeRemaining = resp.item.duration_ms - resp.progress_ms + 10000
       var str = resp.item.uri
       var result = str.substring(str.indexOf("playlist:") + 9)
       var song = resp.item.uri
@@ -47,6 +49,7 @@ export default class Spotify extends React.Component{
           uri: song
         },
         currentPlaylist: result,
+        timer: timeRemaining
       })
       console.log(resp)
     })
@@ -72,49 +75,49 @@ export default class Spotify extends React.Component{
 
   excPlaylist(){
     const { exc } = this.props
-    if(exc >= .6){
+    if(exc >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
 
   engPlaylist(){
     const { eng } = this.props
-    if(eng >= .6){
+    if(eng >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
 
   strPlaylist(){
     const { str } = this.props
-    if(str >= .6){
+    if(str >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
 
   relPlaylist(){
     const { rel } = this.props
-    if(rel >= .6){
+    if(rel >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
 
   intPlaylist(){
     const { int } = this.props
-    if(int >= .6){
+    if(int >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
 
   focPlaylist(){
     const { foc } = this.props
-    if(foc >= .6){
+    if(foc >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
 
   excPlaylist(){
     const { eng, exc, str, rel, int, foc } = this.props
-    if(exc >= .6){
+    if(exc >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
@@ -158,12 +161,10 @@ export default class Spotify extends React.Component{
     this.getPlaying();
     spotifyApi.getMyCurrentPlaybackState()
     .then((resp)=>{
-      let timer = resp.item.duration_ms - resp.progress_ms
-      setInterval(()=> this.getPlaying(), timer + 10)
-      console.log(timer)
+      setInterval(()=> this.componentDidMount(), 1200000)
+      console.log(this.state.timer)
     })
     .catch((error)=> this.setState({error}))
-
   }
 
   render(){

@@ -6,7 +6,7 @@ function App() {
   return (
     <div>
       <h1>MegaBrain</h1>
-      <Cortex/>
+      <Cortex />
     </div>
   );
 }
