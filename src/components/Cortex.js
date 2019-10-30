@@ -290,28 +290,26 @@ export default class Cortex extends React.Component{
     // delete this.state.callbacks[data.id];
     // }
 
-    closeSession(){
-        if (this.state.session_connected == true){
-        let id = this.state.id_sequence;
-            this.state.id_sequence += 1;
-            this.state.callbacks[id] = this.closeSession_callback;
-        let msg = {
-            "id": id,
-            "jsonrpc": "2.0",
-            "method": "updateSession",
-            "params": {
-                "cortexToken": this.state.token,
-                "session": this.state.session_id,
-                "status": "close"
-    }
-
-
-        };
+  closeSession(){
+      if (this.state.session_connected == true){
+      let id = this.state.id_sequence;
+        this.state.id_sequence += 1;
+        this.state.callbacks[id] = this.closeSession_callback;
+      let msg = {
+        "id": id,
+        "jsonrpc": "2.0",
+        "method": "updateSession",
+        "params": {
+          "cortexToken": this.state.token,
+          "session": this.state.session_id,
+          "status": "close"
+        }
+      };
         this.refWebSocket.sendMessage(JSON.stringify(msg));
-    } else {
+      }else{
         console.log("There is currently no active session");
-    }
-}
+      }
+   }
 
     closeSession_callback = (data) => {
         console.log("Running callback for closeSession()");
@@ -338,15 +336,15 @@ export default class Cortex extends React.Component{
             };
         this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
+  }
 
-}
-subscribe_callback = (data) => {
+  subscribe_callback = (data) => {
     console.log("Running callback for subscribe()");
     console.log(data);
     delete this.state.callbacks[data.id];
-}
+  }
 
-unsubscribe(){
+  unsubscribe(){
     if (this.state.connected == true && this.state.session_connected == true){
     let id = this.state.id_sequence;
         this.state.id_sequence += 1;
@@ -362,18 +360,23 @@ unsubscribe(){
             }
         };
     this.refWebSocket.sendMessage(JSON.stringify(msg));
-}
+  }
 
-}
-unsubscribe_callback = (data) => {
-console.log("Running callback for unsubscribe()");
-console.log(data);
-delete this.state.callbacks[data.id];
-}
+  }
+  unsubscribe_callback = (data) => {
+    console.log("Running callback for unsubscribe()");
+    console.log(data);
+    delete this.state.callbacks[data.id];
+  }
 
     handleData(data) {
-        // console.log(this.state.method);
         let result = JSON.parse(data);
+        let engArray = [];
+        let excArray = [];
+        let strArray = [];
+        let relArray = [];
+        let intArray = [];
+        let focArray = [];
         console.log(result);
         if (result.id){
             // call the registered callback
@@ -381,8 +384,15 @@ delete this.state.callbacks[data.id];
             this.state.callbacks[result.id](result);
         }
         if (this.state.connected == true && this.state.session_connected == true && result.met != undefined){
-          return this.state.eng.push(result.met[1])
+          return engArray.push(result.met[1]), excArray.push(result.met[3]), strArray.push(result.met[6]), relArray.push(result.met[8]), intArray.push(result.met[10]), focArray.push(result.met[12])
         }
+        let engMath = engArray.reduce((a, b) => a + b, 0) / engArray.length;
+        let excMath = excArray.reduce((a, b) => a + b, 0) / excArray.length;
+        let strMath = strArray.reduce((a, b) => a + b, 0) / strArray.length;
+        let relMath = relArray.reduce((a, b) => a + b, 0) / relArray.length;
+        let intMath = intArray.reduce((a, b) => a + b, 0) / intArray.length;
+        let focMath = focArray.reduce((a, b) => a + b, 0) / focArray.length;
+        this.setState({eng: engMath, exc: excMath, str: strMath, rel: relMath, int: intMath, foc: focMath})
     }
 
     render() {

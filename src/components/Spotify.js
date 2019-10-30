@@ -72,49 +72,49 @@ export default class Spotify extends React.Component{
 
   excPlaylist(){
     const { exc } = this.props
-    if(exc >= .6){
+    if(exc >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
 
   engPlaylist(){
     const { eng } = this.props
-    if(eng >= .6){
+    if(eng >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
 
   strPlaylist(){
     const { str } = this.props
-    if(str >= .6){
+    if(str >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
 
   relPlaylist(){
     const { rel } = this.props
-    if(rel >= .6){
+    if(rel >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
 
   intPlaylist(){
     const { int } = this.props
-    if(int >= .6){
+    if(int >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
 
   focPlaylist(){
     const { foc } = this.props
-    if(foc >= .6){
+    if(foc >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
 
   excPlaylist(){
     const { eng, exc, str, rel, int, foc } = this.props
-    if(exc >= .6){
+    if(exc >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
       return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
     }
   }
@@ -163,7 +163,6 @@ export default class Spotify extends React.Component{
       console.log(timer)
     })
     .catch((error)=> this.setState({error}))
-
   }
 
   render(){
