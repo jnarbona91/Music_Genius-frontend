@@ -17,7 +17,7 @@ export default class Cortex extends React.Component{
             id_sequence: 1,  // sequence for websocket calls
             callbacks: {},  // keys are id_sequence, values are callbacks
             session_id: "",
-            session_connected: false, 
+            session_connected: false,
             all_streams: ["eeg", "mot", "dev", "pow", "met", "com",  "fac", "sys"],
             eng: "",
             exc: "",
@@ -250,7 +250,7 @@ export default class Cortex extends React.Component{
                 "status": "active"
             }
         };
-        this.refWebSocket.sendMessage(JSON.stringify(msg)); 
+        this.refWebSocket.sendMessage(JSON.stringify(msg));
     }
 
     startSession_callback = (data) => {
@@ -280,7 +280,7 @@ export default class Cortex extends React.Component{
     //             "cortexToken": this.state.token
     //         }
     //     };
-    //     this.refWebSocket.sendMessage(JSON.stringify(msg)); 
+    //     this.refWebSocket.sendMessage(JSON.stringify(msg));
     // }
 
     // querySession_callback = (data) => {
@@ -305,9 +305,9 @@ export default class Cortex extends React.Component{
                 "status": "close"
     }
 
-            
+
         };
-        this.refWebSocket.sendMessage(JSON.stringify(msg)); 
+        this.refWebSocket.sendMessage(JSON.stringify(msg));
     } else {
         console.log("There is currently no active session");
     }
@@ -370,7 +370,7 @@ console.log("Running callback for unsubscribe()");
 console.log(data);
 delete this.state.callbacks[data.id];
 }
-    
+
     handleData(data) {
         // console.log(this.state.method);
         let result = JSON.parse(data);
@@ -380,7 +380,9 @@ delete this.state.callbacks[data.id];
             console.log("executing callback for id = " + result.id);
             this.state.callbacks[result.id](result);
         }
-        
+        if (this.state.connected == true && this.state.session_connected == true && result.met != undefined){
+          return this.state.eng.push(result.met[1])
+        }
     }
 
     render() {
