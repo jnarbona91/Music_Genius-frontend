@@ -211,6 +211,7 @@ export default class Cortex extends React.Component{
     delete this.state.callbacks[data.id];
   }
 
+
   startSession(){
     let id = this.state.id_sequence;
     this.state.id_sequence += 1;
@@ -247,7 +248,7 @@ export default class Cortex extends React.Component{
     //         this.state.id_sequence += 1;
     //         this.state.callbacks[id] = this.querySession_callback;
     //     let msg = {
-    //         "id": id,
+    //         "id":this.state.id_sequence,
     //         "jsonrpc": "2.0",
     //         "method": "querySessions",
     //         "params": {
@@ -263,6 +264,7 @@ export default class Cortex extends React.Component{
     //     console.log(data);
     // delete this.state.callbacks[data.id];
     // }
+
 
   closeSession(){
     if (this.state.session_connected == true){
@@ -331,6 +333,7 @@ export default class Cortex extends React.Component{
           "cortexToken": this.state.token,
           "session": this.state.session_id,
           "streams": this.state.all_streams
+
         }
       };
       this.refWebSocket.sendMessage(JSON.stringify(msg));
@@ -400,7 +403,7 @@ export default class Cortex extends React.Component{
             </br>
             <Button onClick={() => this.startSession()}>Start Session</Button>
             <Button onClick={() => this.closeSession()}>End Session</Button>
-             <h2>Set your sensetivity level</h2>
+             <h2>Set your sensitivity level</h2>
 
              <Button>Sensetivity Nob</Button>
              <Spotify eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions}/>
