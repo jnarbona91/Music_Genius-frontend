@@ -18,6 +18,7 @@ export default class Spotify extends React.Component{
       playlistSongs: [],
       duration: "",
       error: null,
+      timer: ""
     }
   }
   //returns both request and access tokens
@@ -36,6 +37,7 @@ export default class Spotify extends React.Component{
   getPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
     .then((resp)=>{
+      let timeRemaining = resp.item.duration_ms - resp.progress_ms + 10000
       var str = resp.item.uri
       var result = str.substring(str.indexOf("playlist:") + 9)
       var song = resp.item.uri
@@ -47,6 +49,7 @@ export default class Spotify extends React.Component{
           uri: song
         },
         currentPlaylist: result,
+        timer: timeRemaining
       })
       console.log(resp)
     })
@@ -158,9 +161,8 @@ export default class Spotify extends React.Component{
     this.getPlaying();
     spotifyApi.getMyCurrentPlaybackState()
     .then((resp)=>{
-      let timer = resp.item.duration_ms - resp.progress_ms
-      setInterval(()=> this.getPlaying(), timer + 10)
-      console.log(timer)
+      setInterval(()=> this.componentDidMount(), this.state.timer)
+      console.log(this.state.timer)
     })
     .catch((error)=> this.setState({error}))
   }
