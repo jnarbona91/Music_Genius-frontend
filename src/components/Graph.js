@@ -9,7 +9,7 @@ export default class Graph extends React.Component{
   drawBarChart(performanceMetrics){
     const svgGraph = d3.select(this.refs.graph)
       .append("svg")
-      .attr("width", 300)
+      .attr("width", 150)
       .attr("height", 150)
       .style("border", "1px solid black")
     svgGraph.selectAll("rect")
