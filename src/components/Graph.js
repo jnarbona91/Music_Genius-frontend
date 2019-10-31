@@ -3,7 +3,8 @@ import * as d3 from 'd3'
 
 export default class Graph extends React.Component{
   componentDidMount(){
-    const performanceMetrics = [ 10, 22, 50, 90]
+    const { eng, exc, str, rel, int, foc, } = this.props
+    const performanceMetrics = [ eng, exc, str, rel, int, foc]
     this.drawBarChart(performanceMetrics)
   }
   drawBarChart(performanceMetrics){
