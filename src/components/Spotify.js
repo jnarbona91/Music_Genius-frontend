@@ -10,6 +10,7 @@ export default class Spotify extends React.Component{
     if(token){
       spotifyApi.setAccessToken(token)
     }
+    this.interval = null;
     this.state = {
       loggedIn: token ? true : false,
       nowPlaying: { name: 'Not Checked', albumArt: '', uri: '' },
@@ -18,8 +19,9 @@ export default class Spotify extends React.Component{
       playlistSongs: [],
       duration: "",
       error: null,
-      timer: ""
+      timer: 0,
     }
+    this.getPlaying = this.getPlaying.bind(this)
   }
   //returns both request and access tokens
   getHashParams(){
@@ -37,10 +39,12 @@ export default class Spotify extends React.Component{
   getPlaying(){
     spotifyApi.getMyCurrentPlaybackState()
     .then((resp)=>{
-      let timeRemaining = resp.item.duration_ms - resp.progress_ms + 10000
+      let timeRemaining = resp.item.duration_ms - resp.progress_ms + 2000
       var str = resp.item.uri
       var result = str.substring(str.indexOf("playlist:") + 9)
-      var song = resp.item.uri
+      var song = resp.item.uri;
+      clearInterval(this.interval)
+      this.interval = setInterval(this.getPlaying, timeRemaining)
       this.setState({
         nowPlaying: {
           name: resp.item.name,
@@ -51,6 +55,7 @@ export default class Spotify extends React.Component{
         currentPlaylist: result,
         timer: timeRemaining
       })
+      console.log(this.state.timer)
       console.log(resp)
     })
     .catch((error)=> this.setState({error}))
@@ -115,13 +120,6 @@ export default class Spotify extends React.Component{
     }
   }
 
-  excPlaylist(){
-    const { eng, exc, str, rel, int, foc } = this.props
-    if(exc >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
-      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
-    }
-  }
-
   createNewPlaylist(){
     spotifyApi.createPlaylist('melted_snowman', { name: "New Playlist"})
     .then((resp)=>{
@@ -150,21 +148,8 @@ export default class Spotify extends React.Component{
     .catch((error)=> this.setState({error}))
   }
 
-  // getCurrentTrack(){
-  //   spotifyApi.getMyCurrentPlayingTrack()
-  //   .then((resp)=>{
-  //     this.setState({duration: resp.item.duration_ms})
-  //   })
-  // }
-
   componentDidMount(){
     this.getPlaying();
-    spotifyApi.getMyCurrentPlaybackState()
-    .then((resp)=>{
-      setInterval(()=> this.componentDidMount(), 1200000)
-      console.log(this.state.timer)
-    })
-    .catch((error)=> this.setState({error}))
   }
 
   render(){
