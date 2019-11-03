@@ -33,54 +33,53 @@ export default class Cortex extends React.Component{
     console.log("[DEBUG] connected");
   }
    sendMessage(msg, callback){
-        
       let id = this.id_sequence
       this.id_sequence += 1;
       this.callbacks[id] = callback;
-      console.log(msg);
+      //console.log(msg);
       this.refWebSocket.sendMessage(JSON.stringify(msg));
   }
     
   sendHello(){
     // Grab the current id_sequence and increment
-    // let id = this.state.id_sequence;
-    // this.state.id_sequence += 1;
-    // this.state.callbacks[id] = this.hello_callback;set up our callback
+    // let id = this.id_sequence;
+    // this.id_sequence += 1;
+    // this.callbacks[id] = this.hello_callback;set up our callback
     let msg = {
       "jsonrpc": "2.0",
       "method": "getCortexInfo",
-      "id":this.state.id_sequence
+      "id":this.id_sequence
     }
-    this.refWebSocket.sendMessage(JSON.stringify(msg));
+    this.sendMessage(msg, this.hello_callback);
   }
 
   hello_callback = (data) => {
     console.log("Running callback for sendHello()");
     console.log(data);
     // remove callback from callbacks object
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
   }
 
   getUserLogin(){
     let msg = {
       "jsonrpc": "2.0",
       "method": "getUserLogin",
-      "id":this.state.id_sequence
+      "id":this.id_sequence
     }
-    this.refWebSocket.sendMessage(JSON.stringify(msg));
+    this.sendMessage(msg, this.userLogin_callback);
   }
 
   userLogin_callback = (data) => {
     console.log("Running callback for userLogin()");
     console.log(data);
     // remove callback from callbacks object
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
     this.getRequestAccess();
   }
 
   getRequestAccess(){
     let msg = {
-      "id":this.state.id_sequence,
+      "id":this.id_sequence,
       "jsonrpc": "2.0",
       "method": "requestAccess",
       "params": {
@@ -88,20 +87,20 @@ export default class Cortex extends React.Component{
         "clientSecret": "UyNffuiGrWOIUJfrUrqJeiAbVAsgNm7Tyw58AVbYkKEGI4l5MPzKo56K0vvuoWOjgujx5YNoc6CcJvZxOxgICsAjwsy63AF4gfvq9a68fdvY4YgOzafRXeqjWwAbYymK"
       }
     }
-    this.refWebSocket.sendMessage(JSON.stringify(msg));
+    this.sendMessage(msg, this.requestAccess_callback);
   }
 
   requestAccess_callback = (data) => {
     console.log("[DEBUG] Requesting access... please check your cortext app!");
     console.log(data);
     // remove callback from callbacks object
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
     this.getAuthentication();
   }
 
   getAuthentication(){
     let msg = {
-      "id": this.state.id_sequence,
+      "id": this.id_sequence,
       "jsonrpc": "2.0",
       "method": "authorize",
       "params": {
@@ -109,7 +108,7 @@ export default class Cortex extends React.Component{
         "clientSecret": "UyNffuiGrWOIUJfrUrqJeiAbVAsgNm7Tyw58AVbYkKEGI4l5MPzKo56K0vvuoWOjgujx5YNoc6CcJvZxOxgICsAjwsy63AF4gfvq9a68fdvY4YgOzafRXeqjWwAbYymK"
       }
     }
-    this.refWebSocket.sendMessage(JSON.stringify(msg));
+    this.sendMessage(msg, this.authentication_callback);
   }
 
   authentication_callback = (data) => {
@@ -121,20 +120,20 @@ export default class Cortex extends React.Component{
       
     console.log("[DEBUG] received token = " + this.state.token)
     // remove callback from callbacks object
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
     this.queryHeadsets();
   }
 
   queryHeadsets(){
     let msg = {
-      "id":this.state.id_sequence,
+      "id":this.id_sequence,
       "jsonrpc": "2.0",
       "method": "queryHeadsets",
       "params": {
         "id": "EPOC-*"
       }
     };
-    this.refWebSocket.sendMessage(JSON.stringify(msg));
+    this.sendMessage(msg, this.queryHeadsets_callback);
   }
 
   queryHeadsets_callback = (data) => {
@@ -153,14 +152,14 @@ export default class Cortex extends React.Component{
       console.log("[DEBUG] no headsets found");
     }
     // remove callback from callbacks object
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
     this.connectHeadset();
   }
 
   connectHeadset(){
     if (this.state.headset !== ""){
       let msg = {
-        "id":this.state.id_sequence,
+        "id":this.id_sequence,
         "jsonrpc": "2.0",
         "method": "controlDevice",
         "params": {
@@ -169,7 +168,7 @@ export default class Cortex extends React.Component{
         }
       };
       console.log(msg);
-      this.refWebSocket.sendMessage(JSON.stringify(msg));
+      this.sendMessage(msg, this.controlDevice_callback);
     }
   }
 
@@ -177,7 +176,7 @@ export default class Cortex extends React.Component{
     if (this.state.connected === true){ //check if app is actually connected
       if (this.state.headset !== ""){
         let msg = {
-          "id": this.state.id_sequence,
+          "id": this.id_sequence,
           "jsonrpc": "2.0",
           "method": "controlDevice",
           "params": {
@@ -208,13 +207,13 @@ export default class Cortex extends React.Component{
       console.log("refresh request was called, not sure what we do with that.")
     }
     // remove callback from callbacks object
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
   }
 
 
   startSession(){
     let msg = {
-      "id": this.state.id_sequence,
+      "id": this.id_sequence,
       "jsonrpc": "2.0",
       "method": "createSession",
       "params": {
@@ -239,15 +238,15 @@ export default class Cortex extends React.Component{
       console.log(`Session id is ${this.state.session_id}`);
       this.subscribe();
     }
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
   }
 
     // querySession(){
-    //     let id = this.state.id_sequence;
-    //         this.state.id_sequence += 1;
-    //         this.state.callbacks[id] = this.querySession_callback;
+    //     let id = this.id_sequence;
+    //         this.id_sequence += 1;
+    //         this.callbacks[id] = this.querySession_callback;
     //     let msg = {
-    //         "id":this.state.id_sequence,
+    //         "id":this.id_sequence,
     //         "jsonrpc": "2.0",
     //         "method": "querySessions",
     //         "params": {
@@ -261,14 +260,14 @@ export default class Cortex extends React.Component{
 
     //     console.log("Running callback for querySession()");
     //     console.log(data);
-    // delete this.state.callbacks[data.id];
+    // delete this.callbacks[data.id];
     // }
 
 
   closeSession(){
     if (this.state.session_connected === true){
           let msg = {
-                      "id":this.state.id_sequence,
+                      "id":this.id_sequence,
                       "jsonrpc": "2.0",
                       "method": "updateSession",
                       "params": {
@@ -290,14 +289,14 @@ export default class Cortex extends React.Component{
     this.setState({
          session_connected: false
     });
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
   }
 
   // streams has default value of all streams; if user does not specify streams, all_streams will be subscribed
   subscribe(streams = this.state.all_streams){
     if (this.state.connected === true && this.state.session_connected === true){
       let msg = {
-        "id": this.state.id_sequence,
+        "id": this.id_sequence,
         "jsonrpc": "2.0",
         "method": "subscribe",
         "params": {
@@ -313,13 +312,13 @@ export default class Cortex extends React.Component{
   subscribe_callback = (data) => {
     console.log("Running callback for subscribe()");
     console.log(data);
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
   }
 
   unsubscribe(){
     if (this.state.connected === true && this.state.session_connected === true){
       let msg = {
-        "id": this.state.id_sequence,
+        "id": this.id_sequence,
         "jsonrpc": "2.0",
         "method": "unsubscribe",
         "params": {
@@ -336,7 +335,7 @@ export default class Cortex extends React.Component{
   unsubscribe_callback = (data) => {
     console.log("Running callback for unsubscribe()");
     console.log(data);
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
   }
 
   handleData(data) {
@@ -351,7 +350,7 @@ export default class Cortex extends React.Component{
     if (result.id){
       // call the registered callback
       console.log("executing callback for id = " + result.id);
-      this.state.callbacks[result.id](result);
+      this.callbacks[result.id](result);
     }
     if (this.state.connected === true && this.state.session_connected === true && result.met !== undefined){
       return engArray.push(result.met[1]), excArray.push(result.met[3]), strArray.push(result.met[6]), relArray.push(result.met[8]), intArray.push(result.met[10]), focArray.push(result.met[12])
