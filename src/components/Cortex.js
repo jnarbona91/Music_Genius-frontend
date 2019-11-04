@@ -17,12 +17,13 @@ export default class Cortex extends React.Component{
         session_id: "",
         session_connected: false,
         all_streams: [ "met"],
-        eng: "",
-        exc: "",
-        str: "",
-        rel: "",
-        int: "",
-        foc: ""
+        eng: 0,
+        exc: 0,
+        str: 0,
+        rel: 0,
+        int: 0,
+        foc: 0,
+        numSamples: 0
       };
     
     this.callbacks = {};  // keys are id_sequence, values are callbacks
@@ -345,28 +346,82 @@ export default class Cortex extends React.Component{
 
   handleData(data) {
     let result = JSON.parse(data);
-    let engArray = [];
-    let excArray = [];
-    let strArray = [];
-    let relArray = [];
-    let intArray = [];
-    let focArray = [];
+    // let engArray = [];
+    // let excArray = [];
+    // let strArray = [];
+    // let relArray = [];
+    // let intArray = [];
+    // let focArray = [];
     console.log(result);
     if (result.id){
       // call the registered callback
       console.log("executing callback for id = " + result.id);
       this.callbacks[result.id](result);
     }
-    if (this.state.connected === true && this.state.session_connected === true && result.met !== undefined){
-      return engArray.push(result.met[1]), excArray.push(result.met[3]), strArray.push(result.met[6]), relArray.push(result.met[8]), intArray.push(result.met[10]), focArray.push(result.met[12])
+    // if (this.state.connected === true && this.state.session_connected === true && result.met !== undefined){
+    //   return engArray.push(result.met[1]), excArray.push(result.met[3]), strArray.push(result.met[6]), relArray.push(result.met[8]), intArray.push(result.met[10]), focArray.push(result.met[12])
+    // }
+    // let engMath = engArray.reduce((a, b) => a + b, 0) / engArray.length;
+    // let excMath = excArray.reduce((a, b) => a + b, 0) / excArray.length;
+    // let strMath = strArray.reduce((a, b) => a + b, 0) / strArray.length;
+    // let relMath = relArray.reduce((a, b) => a + b, 0) / relArray.length;
+    // let intMath = intArray.reduce((a, b) => a + b, 0) / intArray.length;
+    // let focMath = focArray.reduce((a, b) => a + b, 0) / focArray.length;
+    // this.setState({eng: engMath, exc: excMath, str: strMath, rel: relMath, int: intMath, foc: focMath})
+
+    // console.log(engMath);
+    // console.log(excMath);
+    // console.log(strMath);
+    // console.log(relMath);
+    // console.log(intMath);
+    // console.log(focMath);
+
+    if (this.state.connected === true && this.state.session_connected === true){
+      if (result.met !== undefined){
+        this.handleMetData(result.met);
+      }
+
     }
-    let engMath = engArray.reduce((a, b) => a + b, 0) / engArray.length;
-    let excMath = excArray.reduce((a, b) => a + b, 0) / excArray.length;
-    let strMath = strArray.reduce((a, b) => a + b, 0) / strArray.length;
-    let relMath = relArray.reduce((a, b) => a + b, 0) / relArray.length;
-    let intMath = intArray.reduce((a, b) => a + b, 0) / intArray.length;
-    let focMath = focArray.reduce((a, b) => a + b, 0) / focArray.length;
-    this.setState({eng: engMath, exc: excMath, str: strMath, rel: relMath, int: intMath, foc: focMath})
+  }
+
+  handleMetData(data){
+    //console.log(data);
+    //update averages
+    let engAvg = (this.state.eng * this.state.numSamples + data[1])/(this.state.numSamples + 1);
+    let excAvg = (this.state.exc * this.state.numSamples + data[3])/(this.state.numSamples + 1);
+    let strAvg = (this.state.str * this.state.numSamples + data[6])/(this.state.numSamples + 1);
+    let relAvg = (this.state.rel * this.state.numSamples + data[8])/(this.state.numSamples + 1);
+    let intAvg = (this.state.int * this.state.numSamples + data[10])/(this.state.numSamples + 1);
+    let focAvg = (this.state.foc * this.state.numSamples + data[12])/(this.state.numSamples + 1);
+
+    console.log("eng = " + engAvg);
+    console.log("exc = " + excAvg);
+    console.log("str = " + strAvg);
+    console.log("rel = " + relAvg);
+    console.log("int = " + intAvg);
+    console.log("foc = " + focAvg);
+
+    //if certain average exceeds arbitrary threshold, tell spotify to add current song to playlist, if average goes below low threshold, skip skip, meaning in either case, play next song, then reset all averages and sample count.
+
+    let skipSong = false;
+
+    if (excAvg > 0.6 && engAvg > 0.5){
+      Spotify.excPlaylist(); //did not find a generic add playlist function, but in this case exc is also the metric we are tracking so it'll do.
+      console.log("LOVE IT!");
+      skipSong = true;
+    } if (strAvg > 0.5 || (engAvg < 0.3 && excAvg < 0.5)){
+      console.log("HATE IT!");
+      skipSong = true;
+    } if (skipSong === true){
+      Spotify.skipSong();
+      //this.setState({eng: 0, exc: 0, str: 0, rel: 0, int: 0, foc: 0, numSamples: 0});
+    } else{
+      this.setState({eng: engAvg, exc: excAvg, str: strAvg, rel: relAvg, int: intAvg, foc: focAvg, numSamples: this.state.numSamples + 1});
+    }
+  }
+
+  resetAvg() {
+    this.setState({eng: 0, exc: 0, str: 0, rel: 0, int: 0, foc: 0, numSamples: 0});
   }
 
   render() {
