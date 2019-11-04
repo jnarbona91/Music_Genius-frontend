@@ -16,7 +16,7 @@ export default class Cortex extends React.Component{
         callbacks: {},  // keys are id_sequence, values are callbacks
         session_id: "",
         session_connected: false,
-        all_streams: ["eeg", "mot", "dev", "pow", "met", "com",  "fac", "sys"],
+        all_streams: [ "met"],
         eng: "",
         exc: "",
         str: "",
@@ -24,6 +24,7 @@ export default class Cortex extends React.Component{
         int: "",
         foc: ""
       };
+    
     this.callbacks = {};  // keys are id_sequence, values are callbacks
     this.id_sequence = 1;  // sequence for websocket calls
     this.handleData = this.handleData.bind(this);
@@ -115,7 +116,7 @@ export default class Cortex extends React.Component{
     console.log("Running callback for authentication()");
     console.log(data);
       this.setState({
-        token: 'data.result.cortexToken'
+        token: data.result.cortexToken
     })
       
     console.log("[DEBUG] received token = " + this.state.token)
@@ -141,7 +142,7 @@ export default class Cortex extends React.Component{
     console.log(data);
     if (data.result.length > 0){
       this.setState({
-          headset: 'data.result[0].id'
+          headset: data.result[0].id
     })
         
       console.log("[DEBUG] headset id is: " + this.state.headset);
@@ -193,19 +194,23 @@ export default class Cortex extends React.Component{
   controlDevice_callback = (data) => {
     console.log("Running callback for connect and disconnect()");
     console.log(data);
-    if (data.result.command === "connect"){
-      console.log("connected!!!");
-       this.setState({
-            connected: true
-      });
-    }else if (data.result.command === "disconnect"){
-      console.log("disconnected. :(");
-       this.setState({
-           connected: false
-      });
-    }else { //refresh
-      console.log("refresh request was called, not sure what we do with that.")
-    }
+    if (data.error) {
+      console.log("error connecting/disconnecting: " + data.error.message);
+    } else {
+      if (data.result.command === "connect"){
+        console.log("connected!!!");
+         this.setState({
+              connected: true
+        });
+      }else if (data.result.command === "disconnect"){
+        console.log("disconnected. :(");
+         this.setState({
+             connected: false
+        });
+      }else { //refresh
+        console.log("refresh request was called, not sure what we do with that.")
+      }
+  }
     // remove callback from callbacks object
     delete this.callbacks[data.id];
   }
@@ -232,7 +237,7 @@ export default class Cortex extends React.Component{
       console.log("error starting session: " + data.error.message);
     }else {
        this.setState({
-            session_id: 'data.result.id',
+            session_id: data.result.id,
             session_connected: true
       })
       console.log(`Session id is ${this.state.session_id}`);
