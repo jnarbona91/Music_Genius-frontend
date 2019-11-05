@@ -1,11 +1,8 @@
 import React from "react";
 import Websocket from "react-websocket";
 import { Button } from "reactstrap"
-// import { threadId } from "worker_threads";
 import Spotify from './Spotify'
 import Graph from './Graph'
-import { tsImportEqualsDeclaration } from "@babel/types";
-import { connectableObservableDescriptor } from "rxjs/internal/observable/ConnectableObservable";
 
 export default class Cortex extends React.Component{
   constructor(props) {
@@ -19,67 +16,72 @@ export default class Cortex extends React.Component{
         callbacks: {},  // keys are id_sequence, values are callbacks
         session_id: "",
         session_connected: false,
-        all_streams: ["eeg", "mot", "dev", "pow", "met", "com",  "fac", "sys"],
-        eng: "",
-        exc: "",
-        str: "",
-        rel: "",
-        int: "",
-        foc: ""
+        all_streams: [ "met"],
+        eng: 0,
+        exc: 0,
+        str: 0,
+        rel: 0,
+        int: 0,
+        foc: 0,
+        numSamples: 0
       };
-    this.handleData = this.handleData.bind(this);
+    
+    this.callbacks = {};  // keys are id_sequence, values are callbacks
+    this.id_sequence = 1;  // sequence for websocket calls
+    this.handleData = this.handleData.bind(this);
   }
 
   handleOpen() {
     console.log("[DEBUG] connected");
   }
-
+   sendMessage(msg, callback){
+      let id = this.id_sequence
+      this.id_sequence += 1;
+      this.callbacks[id] = callback;
+      //console.log(msg);
+      this.refWebSocket.sendMessage(JSON.stringify(msg));
+  }
+    
   sendHello(){
     // Grab the current id_sequence and increment
-    let id = this.state.id_sequence;
-    this.state.id_sequence += 1;
-    this.state.callbacks[id] = this.hello_callback;  // set up our callback
+    // let id = this.id_sequence;
+    // this.id_sequence += 1;
+    // this.callbacks[id] = this.hello_callback;set up our callback
     let msg = {
       "jsonrpc": "2.0",
       "method": "getCortexInfo",
-      "id":id
+      "id":this.id_sequence
     }
-    this.refWebSocket.sendMessage(JSON.stringify(msg));
+    this.sendMessage(msg, this.hello_callback);
   }
 
   hello_callback = (data) => {
     console.log("Running callback for sendHello()");
     console.log(data);
     // remove callback from callbacks object
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
   }
 
   getUserLogin(){
-    let id = this.state.id_sequence;
-    this.state.id_sequence += 1;
-    this.state.callbacks[id] = this.userLogin_callback;
     let msg = {
       "jsonrpc": "2.0",
       "method": "getUserLogin",
-      "id":id
+      "id":this.id_sequence
     }
-    this.refWebSocket.sendMessage(JSON.stringify(msg));
+    this.sendMessage(msg, this.userLogin_callback);
   }
 
   userLogin_callback = (data) => {
     console.log("Running callback for userLogin()");
     console.log(data);
     // remove callback from callbacks object
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
     this.getRequestAccess();
   }
 
   getRequestAccess(){
-    let id = this.state.id_sequence;
-    this.state.id_sequence += 1;
-    this.state.callbacks[id] = this.requestAccess_callback;
     let msg = {
-      "id":id,
+      "id":this.id_sequence,
       "jsonrpc": "2.0",
       "method": "requestAccess",
       "params": {
@@ -87,23 +89,20 @@ export default class Cortex extends React.Component{
         "clientSecret": "UyNffuiGrWOIUJfrUrqJeiAbVAsgNm7Tyw58AVbYkKEGI4l5MPzKo56K0vvuoWOjgujx5YNoc6CcJvZxOxgICsAjwsy63AF4gfvq9a68fdvY4YgOzafRXeqjWwAbYymK"
       }
     }
-    this.refWebSocket.sendMessage(JSON.stringify(msg));
+    this.sendMessage(msg, this.requestAccess_callback);
   }
 
   requestAccess_callback = (data) => {
     console.log("[DEBUG] Requesting access... please check your cortext app!");
     console.log(data);
     // remove callback from callbacks object
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
     this.getAuthentication();
   }
 
   getAuthentication(){
-    let id = this.state.id_sequence;
-    this.state.id_sequence += 1;
-    this.state.callbacks[id] = this.authentication_callback;
     let msg = {
-      "id": id,
+      "id": this.id_sequence,
       "jsonrpc": "2.0",
       "method": "authorize",
       "params": {
@@ -111,56 +110,58 @@ export default class Cortex extends React.Component{
         "clientSecret": "UyNffuiGrWOIUJfrUrqJeiAbVAsgNm7Tyw58AVbYkKEGI4l5MPzKo56K0vvuoWOjgujx5YNoc6CcJvZxOxgICsAjwsy63AF4gfvq9a68fdvY4YgOzafRXeqjWwAbYymK"
       }
     }
-    this.refWebSocket.sendMessage(JSON.stringify(msg));
+    this.sendMessage(msg, this.authentication_callback);
   }
 
   authentication_callback = (data) => {
     console.log("Running callback for authentication()");
     console.log(data);
-    this.state.token = data.result.cortexToken;
+      this.setState({
+        token: data.result.cortexToken
+    })
+      
     console.log("[DEBUG] received token = " + this.state.token)
     // remove callback from callbacks object
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
     this.queryHeadsets();
   }
 
   queryHeadsets(){
-    let id = this.state.id_sequence;
-    this.state.id_sequence += 1;
-    this.state.callbacks[id] = this.queryHeadsets_callback;
     let msg = {
-      "id": id,
+      "id":this.id_sequence,
       "jsonrpc": "2.0",
       "method": "queryHeadsets",
       "params": {
         "id": "EPOC-*"
       }
     };
-    this.refWebSocket.sendMessage(JSON.stringify(msg));
+    this.sendMessage(msg, this.queryHeadsets_callback);
   }
 
   queryHeadsets_callback = (data) => {
     console.log("Running callback for queryHeadset()");
     console.log(data);
     if (data.result.length > 0){
-      this.state.headset = data.result[0].id;
+      this.setState({
+          headset: data.result[0].id
+    })
+        
       console.log("[DEBUG] headset id is: " + this.state.headset);
     }else{
-      this.state.headset = "";
+      this.setState({
+           headset: ""
+      })
       console.log("[DEBUG] no headsets found");
     }
     // remove callback from callbacks object
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
     this.connectHeadset();
   }
 
   connectHeadset(){
-    let id = this.state.id_sequence;
-    this.state.id_sequence += 1;
-    this.state.callbacks[id] = this.controlDevice_callback;
-    if (this.state.headset != ""){
+    if (this.state.headset !== ""){
       let msg = {
-        "id":id,
+        "id":this.id_sequence,
         "jsonrpc": "2.0",
         "method": "controlDevice",
         "params": {
@@ -169,26 +170,22 @@ export default class Cortex extends React.Component{
         }
       };
       console.log(msg);
-      this.refWebSocket.sendMessage(JSON.stringify(msg));
+      this.sendMessage(msg, this.controlDevice_callback);
     }
   }
 
   disconnectHeadset(){
-    if (this.state.connected == true){ //check if app is actually connected
-      let id = this.state.id_sequence;
-      this.state.id_sequence += 1;
-      this.state.callbacks[id] = this.controlDevice_callback;
-      if (this.state.headset != ""){
+    if (this.state.connected === true){ //check if app is actually connected
+      if (this.state.headset !== ""){
         let msg = {
-          "id":id,
+          "id": this.id_sequence,
           "jsonrpc": "2.0",
           "method": "controlDevice",
           "params": {
             "command": "disconnect",
             "headset": this.state.headset            }
           };
-        console.log(msg);
-        this.refWebSocket.sendMessage(JSON.stringify(msg));
+        this.sendMessage(msg, this.controlDevice_callback);
       }
     }else{
       console.log("Already disconnected, please connect first!")
@@ -196,28 +193,33 @@ export default class Cortex extends React.Component{
   }
 
   controlDevice_callback = (data) => {
-    console.log("Running callback for connest and disconnet()");
+    console.log("Running callback for connect and disconnect()");
     console.log(data);
-    if (data.result.command == "connect"){
-      console.log("connected!!!");
-      this.state.connected = true;
-    }else if (data.result.command == "disconnect"){
-      console.log("disconnected. :(");
-      this.state.connected = false;
-    }else { //refresh
-      console.log("refresh request was called, not sure what we do with that.")
-    }
+    if (data.error) {
+      console.log("error connecting/disconnecting: " + data.error.message);
+    } else {
+      if (data.result.command === "connect"){
+        console.log("connected!!!");
+         this.setState({
+              connected: true
+        });
+      }else if (data.result.command === "disconnect"){
+        console.log("disconnected. :(");
+         this.setState({
+             connected: false
+        });
+      }else { //refresh
+        console.log("refresh request was called, not sure what we do with that.")
+      }
+  }
     // remove callback from callbacks object
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
   }
 
 
   startSession(){
-    let id = this.state.id_sequence;
-    this.state.id_sequence += 1;
-    this.state.callbacks[id] = this.startSession_callback;
     let msg = {
-      "id": id,
+      "id": this.id_sequence,
       "jsonrpc": "2.0",
       "method": "createSession",
       "params": {
@@ -226,7 +228,7 @@ export default class Cortex extends React.Component{
         "status": "active"
       }
     };
-    this.refWebSocket.sendMessage(JSON.stringify(msg));
+       this.sendMessage(msg, this.startSession_callback); 
   }
 
   startSession_callback = (data) => {
@@ -235,20 +237,22 @@ export default class Cortex extends React.Component{
     if (data.error){
       console.log("error starting session: " + data.error.message);
     }else {
-      this.state.session_id = data.result.id;
-      this.state.session_connected = true;
+       this.setState({
+            session_id: data.result.id,
+            session_connected: true
+      })
       console.log(`Session id is ${this.state.session_id}`);
       this.subscribe();
     }
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
   }
 
     // querySession(){
-    //     let id = this.state.id_sequence;
-    //         this.state.id_sequence += 1;
-    //         this.state.callbacks[id] = this.querySession_callback;
+    //     let id = this.id_sequence;
+    //         this.id_sequence += 1;
+    //         this.callbacks[id] = this.querySession_callback;
     //     let msg = {
-    //         "id":this.state.id_sequence,
+    //         "id":this.id_sequence,
     //         "jsonrpc": "2.0",
     //         "method": "querySessions",
     //         "params": {
@@ -262,26 +266,24 @@ export default class Cortex extends React.Component{
 
     //     console.log("Running callback for querySession()");
     //     console.log(data);
-    // delete this.state.callbacks[data.id];
+    // delete this.callbacks[data.id];
     // }
 
 
   closeSession(){
-    if (this.state.session_connected == true){
-      let id = this.state.id_sequence;
-        this.state.id_sequence += 1;
-        this.state.callbacks[id] = this.closeSession_callback;
-      let msg = {
-        "id": id,
-        "jsonrpc": "2.0",
-        "method": "updateSession",
-        "params": {
-          "cortexToken": this.state.token,
-          "session": this.state.session_id,
-          "status": "close"
-        }
-      };
-      this.refWebSocket.sendMessage(JSON.stringify(msg));
+    if (this.state.session_connected === true){
+          let msg = {
+                      "id":this.id_sequence,
+                      "jsonrpc": "2.0",
+                      "method": "updateSession",
+                      "params": {
+                          "cortexToken": this.state.token,
+                          "session": this.state.session_id,
+                          "status": "close"
+              }
+          
+                   };
+                  this.sendMessage(msg, this.closeSession_callback);
     }else{
       console.log("There is currently no active session");
     }
@@ -290,18 +292,17 @@ export default class Cortex extends React.Component{
   closeSession_callback = (data) => {
     console.log("Running callback for closeSession()");
     console.log(data);
-    this.state.session_connected = false;
-    delete this.state.callbacks[data.id];
+    this.setState({
+         session_connected: false
+    });
+    delete this.callbacks[data.id];
   }
 
   // streams has default value of all streams; if user does not specify streams, all_streams will be subscribed
   subscribe(streams = this.state.all_streams){
-    if (this.state.connected == true && this.state.session_connected == true){
-      let id = this.state.id_sequence;
-      this.state.id_sequence += 1;
-      this.state.callbacks[id] = this.subscribe_callback;
+    if (this.state.connected === true && this.state.session_connected === true){
       let msg = {
-        "id": id,
+        "id": this.id_sequence,
         "jsonrpc": "2.0",
         "method": "subscribe",
         "params": {
@@ -310,23 +311,20 @@ export default class Cortex extends React.Component{
           "streams": streams
         }
       };
-      this.refWebSocket.sendMessage(JSON.stringify(msg));
+      this.sendMessage(msg, this.subscribe_callback);
     }
   }
 
   subscribe_callback = (data) => {
     console.log("Running callback for subscribe()");
     console.log(data);
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
   }
 
   unsubscribe(){
-    if (this.state.connected == true && this.state.session_connected == true){
-      let id = this.state.id_sequence;
-      this.state.id_sequence += 1;
-      this.state.callbacks[id] = this.unsubscribe_callback;
+    if (this.state.connected === true && this.state.session_connected === true){
       let msg = {
-        "id": id,
+        "id": this.id_sequence,
         "jsonrpc": "2.0",
         "method": "unsubscribe",
         "params": {
@@ -336,40 +334,94 @@ export default class Cortex extends React.Component{
 
         }
       };
-      this.refWebSocket.sendMessage(JSON.stringify(msg));
+      this.sendMessage(msg, this.unsubscribe_callback);
     }
   }
 
   unsubscribe_callback = (data) => {
     console.log("Running callback for unsubscribe()");
     console.log(data);
-    delete this.state.callbacks[data.id];
+    delete this.callbacks[data.id];
   }
 
   handleData(data) {
     let result = JSON.parse(data);
-    let engArray = [];
-    let excArray = [];
-    let strArray = [];
-    let relArray = [];
-    let intArray = [];
-    let focArray = [];
+    // let engArray = [];
+    // let excArray = [];
+    // let strArray = [];
+    // let relArray = [];
+    // let intArray = [];
+    // let focArray = [];
     console.log(result);
     if (result.id){
       // call the registered callback
       console.log("executing callback for id = " + result.id);
-      this.state.callbacks[result.id](result);
+      this.callbacks[result.id](result);
     }
-    if (this.state.connected == true && this.state.session_connected == true && result.met != undefined){
-      return engArray.push(result.met[1]), excArray.push(result.met[3]), strArray.push(result.met[6]), relArray.push(result.met[8]), intArray.push(result.met[10]), focArray.push(result.met[12])
+    // if (this.state.connected === true && this.state.session_connected === true && result.met !== undefined){
+    //   return engArray.push(result.met[1]), excArray.push(result.met[3]), strArray.push(result.met[6]), relArray.push(result.met[8]), intArray.push(result.met[10]), focArray.push(result.met[12])
+    // }
+    // let engMath = engArray.reduce((a, b) => a + b, 0) / engArray.length;
+    // let excMath = excArray.reduce((a, b) => a + b, 0) / excArray.length;
+    // let strMath = strArray.reduce((a, b) => a + b, 0) / strArray.length;
+    // let relMath = relArray.reduce((a, b) => a + b, 0) / relArray.length;
+    // let intMath = intArray.reduce((a, b) => a + b, 0) / intArray.length;
+    // let focMath = focArray.reduce((a, b) => a + b, 0) / focArray.length;
+    // this.setState({eng: engMath, exc: excMath, str: strMath, rel: relMath, int: intMath, foc: focMath})
+
+    // console.log(engMath);
+    // console.log(excMath);
+    // console.log(strMath);
+    // console.log(relMath);
+    // console.log(intMath);
+    // console.log(focMath);
+
+    if (this.state.connected === true && this.state.session_connected === true){
+      if (result.met !== undefined){
+        this.handleMetData(result.met);
+      }
+
     }
-    let engMath = engArray.reduce((a, b) => a + b, 0) / engArray.length;
-    let excMath = excArray.reduce((a, b) => a + b, 0) / excArray.length;
-    let strMath = strArray.reduce((a, b) => a + b, 0) / strArray.length;
-    let relMath = relArray.reduce((a, b) => a + b, 0) / relArray.length;
-    let intMath = intArray.reduce((a, b) => a + b, 0) / intArray.length;
-    let focMath = focArray.reduce((a, b) => a + b, 0) / focArray.length;
-    this.setState({eng: engMath, exc: excMath, str: strMath, rel: relMath, int: intMath, foc: focMath})
+  }
+
+  handleMetData(data){
+    //console.log(data);
+    //update averages
+    let engAvg = (this.state.eng * this.state.numSamples + data[1])/(this.state.numSamples + 1);
+    let excAvg = (this.state.exc * this.state.numSamples + data[3])/(this.state.numSamples + 1);
+    let strAvg = (this.state.str * this.state.numSamples + data[6])/(this.state.numSamples + 1);
+    let relAvg = (this.state.rel * this.state.numSamples + data[8])/(this.state.numSamples + 1);
+    let intAvg = (this.state.int * this.state.numSamples + data[10])/(this.state.numSamples + 1);
+    let focAvg = (this.state.foc * this.state.numSamples + data[12])/(this.state.numSamples + 1);
+
+    console.log("eng = " + engAvg);
+    console.log("exc = " + excAvg);
+    console.log("str = " + strAvg);
+    console.log("rel = " + relAvg);
+    console.log("int = " + intAvg);
+    console.log("foc = " + focAvg);
+
+    //if certain average exceeds arbitrary threshold, tell spotify to add current song to playlist, if average goes below low threshold, skip skip, meaning in either case, play next song, then reset all averages and sample count.
+
+    let skipSong = false;
+
+    if (excAvg > 0.6 && engAvg > 0.5){
+      Spotify.excPlaylist(); //did not find a generic add playlist function, but in this case exc is also the metric we are tracking so it'll do.
+      console.log("LOVE IT!");
+      skipSong = true;
+    } if (strAvg > 0.5 || (engAvg < 0.3 && excAvg < 0.5)){
+      console.log("HATE IT!");
+      skipSong = true;
+    } if (skipSong === true){
+      Spotify.skipSong();
+      //this.setState({eng: 0, exc: 0, str: 0, rel: 0, int: 0, foc: 0, numSamples: 0});
+    } else{
+      this.setState({eng: engAvg, exc: excAvg, str: strAvg, rel: relAvg, int: intAvg, foc: focAvg, numSamples: this.state.numSamples + 1});
+    }
+  }
+
+  resetAvg() {
+    this.setState({eng: 0, exc: 0, str: 0, rel: 0, int: 0, foc: 0, numSamples: 0});
   }
 
   render() {
