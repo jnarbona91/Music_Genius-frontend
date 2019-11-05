@@ -26,9 +26,9 @@ export default class Graph extends React.Component{
     svgGraph.selectAll("rect")
       .data(performanceMetrics).enter()
         .append("rect")
-        .attr("width", 30)
+        .attr("width", 15)
         .attr("height", (datapoint) => datapoint * 1000)
-        .attr("fill", "blue")
+        .attr("fill", "gray")
         .attr("x", (datapoint, iteration) => iteration * 40)
         .attr("y", (datapoint) => 150 - datapoint  )
   }
