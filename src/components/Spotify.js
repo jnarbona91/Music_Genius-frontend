@@ -62,14 +62,14 @@ export default class Spotify extends React.Component{
   }
 
   getPlaying(){
-    spotifyApi.getMyCurrentPlaybackState();
+    spotifyApi.getMyCurrentPlaybackState()
     .then((resp)=>{
-      let timeRemaining = resp.item.duration_ms - resp.progress_ms + 2000;
-      var str = resp.item.uri;
-      var result = str.substring(str.indexOf("playlist:") + 9);
-      var song = resp.item.uri;
-      clearInterval(this.interval);
-      this.interval = setInterval(this.getPlaying, timeRemaining);
+      let timeRemaining = resp.item.duration_ms - resp.progress_ms + 2000
+      var str = resp.item.uri
+      var result = str.substring(str.indexOf("playlist:") + 9)
+      var song = resp.item.uri
+      clearInterval(this.interval)
+      this.interval = setInterval(this.getPlaying, timeRemaining)
       this.setState({
         nowPlaying: {
           name: resp.item.name,
@@ -87,7 +87,7 @@ export default class Spotify extends React.Component{
   }
 
   getCurrentPlaylist(){
-    spotifyApi.getPlaylist(this.state.currentPlaylist);
+    spotifyApi.getPlaylist(this.state.currentPlaylist)
     .then((resp)=>{
       return resp
     })
@@ -143,7 +143,7 @@ export default class Spotify extends React.Component{
   }
 
   createNewPlaylist(userId = "melted_snowman", playListName="New Playlist"){
-    spotifyApi.createPlaylist(userId, { name: playListName});
+    spotifyApi.createPlaylist(userId, { name: playListName})
     .then((resp)=>{
       console.log(resp)
     })
@@ -151,7 +151,7 @@ export default class Spotify extends React.Component{
   }
 
   getUserId(){
-    spotifyApi.getMe();
+    spotifyApi.getMe()
     .then((resp)=>{
       this.setState({
         userId: resp.id
@@ -161,7 +161,7 @@ export default class Spotify extends React.Component{
   }
 
   playlistTracks(){
-    spotifyApi.getPlaylistTracks("5TOheLold9VEiIUcljAQlK");
+    spotifyApi.getPlaylistTracks("5TOheLold9VEiIUcljAQlK")
     .then((resp)=>{
       resp.items.map((song)=>{
         return this.state.playlistSongs.push(song.track.name)
