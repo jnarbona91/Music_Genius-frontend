@@ -416,26 +416,26 @@ export default class Cortex extends React.Component{
   //   } else{
   //     this.setState({eng: engAvg, exc: excAvg, str: strAvg, rel: relAvg, int: intAvg, foc: focAvg, numSamples: this.state.numSamples + 1});
   //   }
-  // }
+    if (engAvg > 0.6){
+      this.tellSpotify("addEng")
+    }
 
-  if (engAvg > 0.6){
-    this.tellSpotify("addEng")
-  }
+    if (strAvg > 0.6){
+      this.tellSpotify("addStr")
+    }
 
-  if (strAvg > 0.6){
-    this.tellSpotify("addStr")
-  }
+    if (intAvg > 0.6){
+      this.tellSpotify("addInt")
+    }
 
-  if (intAvg > 0.6){
-    this.tellSpotify("addInt")
-  }
+    if ( relAvg > 0.6){
+      this.tellSpotify("addRel")
+    }
 
-  if ( relAvg > 0.6){
-    this.tellSpotify("addRel")
-  }
+    if ( focAvg > 0.6){
+      this.tellSpotify("addFoc")
+    }
 
-  if ( focAvg > 0.6){
-    this.tellSpotify("addFoc")
   }
 
   resetAvg() {
