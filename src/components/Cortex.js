@@ -1,8 +1,6 @@
 import React from "react";
 import Websocket from "react-websocket";
 import { Button } from "reactstrap"
-import Spotify from './Spotify'
-import Graph from './Graph'
 
 export default class Cortex extends React.Component{
   constructor(props) {
@@ -406,14 +404,14 @@ export default class Cortex extends React.Component{
     let skipSong = false;
 
     if (excAvg > 0.6 && engAvg > 0.5){
-      Spotify.excPlaylist(); //did not find a generic add playlist function, but in this case exc is also the metric we are tracking so it'll do.
+      this.tellSpotify("add") //did not find a generic add playlist function, but in this case exc is also the metric we are tracking so it'll do.
       console.log("LOVE IT!");
       skipSong = true;
     } if (strAvg > 0.5 || (engAvg < 0.3 && excAvg < 0.5)){
       console.log("HATE IT!");
       skipSong = true;
     } if (skipSong === true){
-      Spotify.skipSong();
+      this.tellSpotify("skip")
       //this.setState({eng: 0, exc: 0, str: 0, rel: 0, int: 0, foc: 0, numSamples: 0});
     } else{
       this.setState({eng: engAvg, exc: excAvg, str: strAvg, rel: relAvg, int: intAvg, foc: focAvg, numSamples: this.state.numSamples + 1});
@@ -422,6 +420,11 @@ export default class Cortex extends React.Component{
 
   resetAvg() {
     this.setState({eng: 0, exc: 0, str: 0, rel: 0, int: 0, foc: 0, numSamples: 0});
+  }
+
+  tellSpotify = (command) => {
+      console.log("[Cortex] sending: " + command)
+      this.props.parentCallback(command);
   }
 
   render() {
@@ -455,11 +458,8 @@ export default class Cortex extends React.Component{
             </br>
             <Button onClick={() => this.startSession()}>Start Session</Button>
             <Button onClick={() => this.closeSession()}>End Session</Button>
-             <h2>Set your sensitivity level</h2>
-
-             <Button>Sensetivity Nob</Button>
-             <Spotify eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions}/>
-             <Graph eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions}/>
+            <Button onClick={() => this.tellSpotify("add")}>Tell spotify to add</Button>
+            <Button onClick={() => this.tellSpotify("skip")}>Tell spotify to skip</Button>
             </div>
         )
     };
