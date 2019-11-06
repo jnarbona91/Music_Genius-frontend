@@ -403,19 +403,39 @@ export default class Cortex extends React.Component{
 
     let skipSong = false;
 
-    if (excAvg > 0.6 && engAvg > 0.5){
-      this.tellSpotify("add") //did not find a generic add playlist function, but in this case exc is also the metric we are tracking so it'll do.
-      console.log("LOVE IT!");
-      skipSong = true;
-    } if (strAvg > 0.5 || (engAvg < 0.3 && excAvg < 0.5)){
-      console.log("HATE IT!");
-      skipSong = true;
-    } if (skipSong === true){
-      this.tellSpotify("skip")
-      //this.setState({eng: 0, exc: 0, str: 0, rel: 0, int: 0, foc: 0, numSamples: 0});
-    } else{
-      this.setState({eng: engAvg, exc: excAvg, str: strAvg, rel: relAvg, int: intAvg, foc: focAvg, numSamples: this.state.numSamples + 1});
-    }
+  //   if (excAvg > 0.6){
+  //     this.tellSpotify("addExc") //did not find a generic add playlist function, but in this case exc is also the metric we are tracking so it'll do.
+  //     console.log("LOVE IT!");
+  //     skipSong = true;
+  //   } if (strAvg > 0.5 || (engAvg < 0.3 && excAvg < 0.5)){
+  //     console.log("HATE IT!");
+  //     skipSong = true;
+  //   } if (skipSong === true){
+  //     this.tellSpotify("skip")
+  //     //this.setState({eng: 0, exc: 0, str: 0, rel: 0, int: 0, foc: 0, numSamples: 0});
+  //   } else{
+  //     this.setState({eng: engAvg, exc: excAvg, str: strAvg, rel: relAvg, int: intAvg, foc: focAvg, numSamples: this.state.numSamples + 1});
+  //   }
+  // }
+
+  if (engAvg > 0.6){
+    this.tellSpotify("addEng")
+  }
+
+  if (strAvg > 0.6){
+    this.tellSpotify("addStr")
+  }
+
+  if (intAvg > 0.6){
+    this.tellSpotify("addInt")
+  }
+
+  if ( relAvg > 0.6){
+    this.tellSpotify("addRel")
+  }
+
+  if ( focAvg > 0.6){
+    this.tellSpotify("addFoc")
   }
 
   resetAvg() {

@@ -28,38 +28,48 @@ export default class Spotify extends React.Component{
   handleCortexCommand(command){
     console.log("[Spotify] received message: " + command)
 
-    if (command == "add"){
-      this.addSongToPlaylist();
-    } else if (command == "skip") {
-      this.skipSong();
+    if (command == "addExc"){
+      this.excPlaylist();
+    } 
+    if (command == "addEng"){
+      this.engPlaylist();
     }
-    else {
-      console.log("don't know this command: " + command);
+    if (command == "addFoc"){
+      this.focPlaylist();
+    }
+    if (command == "addStr"){
+      this.strPlaylist();
+    }
+    if (command == "addInt"){
+      this.intPlaylist();
+    }
+    if (command == "addRel"){
+      this.relPlaylist();
     }
   }
 
   //returns both request and access tokens
   getHashParams(){
     var hashParams = {};
-    var e, r = /([^&;=]+)=?([^&;]*)/g
-    var q = window.location.hash.substring(1)
+    var e, r = /([^&;=]+)=?([^&;]*)/g;
+    var q = window.location.hash.substring(1);
     e = r.exec(q)
     while(e){
-      hashParams[e[1]] = decodeURIComponent(e[2])
+      hashParams[e[1]] = decodeURIComponent(e[2]);
       e= r.exec(q);
     }
     return hashParams
   }
 
   getPlaying(){
-    spotifyApi.getMyCurrentPlaybackState()
+    spotifyApi.getMyCurrentPlaybackState();
     .then((resp)=>{
-      let timeRemaining = resp.item.duration_ms - resp.progress_ms + 2000
-      var str = resp.item.uri
-      var result = str.substring(str.indexOf("playlist:") + 9)
+      let timeRemaining = resp.item.duration_ms - resp.progress_ms + 2000;
+      var str = resp.item.uri;
+      var result = str.substring(str.indexOf("playlist:") + 9);
       var song = resp.item.uri;
-      clearInterval(this.interval)
-      this.interval = setInterval(this.getPlaying, timeRemaining)
+      clearInterval(this.interval);
+      this.interval = setInterval(this.getPlaying, timeRemaining);
       this.setState({
         nowPlaying: {
           name: resp.item.name,
@@ -77,20 +87,20 @@ export default class Spotify extends React.Component{
   }
 
   getCurrentPlaylist(){
-    spotifyApi.getPlaylist(this.state.currentPlaylist)
+    spotifyApi.getPlaylist(this.state.currentPlaylist);
     .then((resp)=>{
       return resp
     })
   }
 
   skipSong(){
-    spotifyApi.skipToNext()
-    this.getPlaying()
+    spotifyApi.skipToNext();
+    this.getPlaying();
   }
 
   prevSong(){ 
-    spotifyApi.skipToPrevious()
-      return this.getPlaying()
+    spotifyApi.skipToPrevious();
+      return this.getPlaying();
   }
 
   addSongToPlaylist(){
@@ -109,49 +119,31 @@ export default class Spotify extends React.Component{
   }
 
   excPlaylist(){
-    const { exc } = this.props
-    if(exc >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
-      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
-    }
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri]);
   }
 
   engPlaylist(){
-    const { eng } = this.props
-    if(eng >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
-      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
-    }
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri]);
   }
 
   strPlaylist(){
-    const { str } = this.props
-    if(str >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
-      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
-    }
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri]);
   }
 
   relPlaylist(){
-    const { rel } = this.props
-    if(rel >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
-      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
-    }
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri]);
   }
 
   intPlaylist(){
-    const { int } = this.props
-    if(int >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
-      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
-    }
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri]);
   }
 
   focPlaylist(){
-    const { foc } = this.props
-    if(foc >= .6 && this.state.currentPlaylist.includes(this.state.nowPlaying.name) === false){
-      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
-    }
+      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri]);
   }
 
   createNewPlaylist(userId = "melted_snowman", playListName="New Playlist"){
-    spotifyApi.createPlaylist(userId, { name: playListName})
+    spotifyApi.createPlaylist(userId, { name: playListName});
     .then((resp)=>{
       console.log(resp)
     })
@@ -159,7 +151,7 @@ export default class Spotify extends React.Component{
   }
 
   getUserId(){
-    spotifyApi.getMe()
+    spotifyApi.getMe();
     .then((resp)=>{
       this.setState({
         userId: resp.id
@@ -169,7 +161,7 @@ export default class Spotify extends React.Component{
   }
 
   playlistTracks(){
-    spotifyApi.getPlaylistTracks("5TOheLold9VEiIUcljAQlK")
+    spotifyApi.getPlaylistTracks("5TOheLold9VEiIUcljAQlK");
     .then((resp)=>{
       resp.items.map((song)=>{
         return this.state.playlistSongs.push(song.track.name)
