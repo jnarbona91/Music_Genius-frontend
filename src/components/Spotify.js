@@ -15,6 +15,7 @@ export default class Spotify extends React.Component{
       loggedIn: token ? true : false,
       nowPlaying: { name: 'Not Checked', albumArt: '', uri: '' },
       userId: "",
+      playlistId: "",
       currentPlaylist: "",
       playlistSongs: [],
       duration: "",
@@ -23,6 +24,20 @@ export default class Spotify extends React.Component{
     }
     this.getPlaying = this.getPlaying.bind(this)
   }
+
+  handleCortexCommand(command){
+    console.log("[Spotify] received message: " + command)
+
+    if (command == "add"){
+      this.addSongToPlaylist();
+    } else if (command == "skip") {
+      this.skipSong();
+    }
+    else {
+      console.log("don't know this command: " + command);
+    }
+  }
+
   //returns both request and access tokens
   getHashParams(){
     var hashParams = {};
@@ -70,12 +85,27 @@ export default class Spotify extends React.Component{
 
   skipSong(){
     spotifyApi.skipToNext()
+    this.getPlaying()
+  }
+
+  prevSong(){ 
+    spotifyApi.skipToPrevious()
       return this.getPlaying()
   }
 
-  prevSong(){
-    spotifyApi.skipToPrevious()
-      return this.getPlaying()
+  addSongToPlaylist(){
+    // console.log("current playlist = " + this.state.playlistID)
+    // if (this.state.playlistId === ""){ //no current playlist, make a new one
+    //   spotifyApi.getMe().then(function(data) {
+    //     console.log(data.id)
+    //     return data.id;
+    //   })
+    //   console.log("user id = " + this.state.userId)
+    //   console.log(this.createNewPlaylist(this.state.userId, "music_genius"))
+    // }
+
+    // return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri])
+    console.log("doing some spotify playlist add stuff...")
   }
 
   excPlaylist(){
@@ -120,8 +150,8 @@ export default class Spotify extends React.Component{
     }
   }
 
-  createNewPlaylist(){
-    spotifyApi.createPlaylist('melted_snowman', { name: "New Playlist"})
+  createNewPlaylist(userId = "melted_snowman", playListName="New Playlist"){
+    spotifyApi.createPlaylist(userId, { name: playListName})
     .then((resp)=>{
       console.log(resp)
     })
@@ -132,7 +162,7 @@ export default class Spotify extends React.Component{
     spotifyApi.getMe()
     .then((resp)=>{
       this.setState({
-        userId: resp.is
+        userId: resp.id
       })
     })
     .catch((error)=> this.setState({error}))
@@ -197,6 +227,7 @@ export default class Spotify extends React.Component{
 
         }
         </div>
+        {/* {this.handleCortexCommand(this.props.dataFromCortex)} */}
       </div>
     )
   }

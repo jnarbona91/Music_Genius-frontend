@@ -1,12 +1,12 @@
 import React from 'react';
-import Cortex from './components/Cortex';
+import Genius from './components/Genius';
 import './App.css';
 
 function App() {
   return (
     <div>
       <h1>MegaBrain</h1>
-      <Cortex />
+      <Genius />
     </div>
   );
 }
