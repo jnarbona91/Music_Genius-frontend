@@ -18,16 +18,22 @@ export default class Genius extends React.Component{
         }   
     }
     cortexCallback = (cortexMsg) => {
-        console.log("[Genius] cortex said: " + cortexMsg);
+        console.log("[Genius] forwarding command to spotify: " + cortexMsg);
         this.setState({cortexMessage: cortexMsg})
         this.refs.spotifyComponent.handleCortexCommand(cortexMsg);
+    }
+
+    spotifyCallback = (spotifyMsg) => {
+        console.log("[Genius] forwarding command to cortex: " + spotifyMsg);
+        this.setState({spotifyMessage: spotifyMsg})
+        this.refs.cortexComponent.handleSpotifyCommand(spotifyMsg);
     }
 
     render() {
         return (
             <div>
-                <Cortex parentCallback = {this.cortexCallback}/>
-                <Spotify ref="spotifyComponent" eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions} dataFromCortex = {this.state.cortexMessage}/>
+                <Cortex ref="cortexComponent" parentCallback = {this.cortexCallback}/>
+                <Spotify ref="spotifyComponent" parentCallback = {this.spotifyCallback} eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions} dataFromCortex = {this.state.cortexMessage}/>
                 <Graph eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions}/>
             </div>
             

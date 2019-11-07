@@ -32,7 +32,17 @@ export default class Cortex extends React.Component{
   handleOpen() {
     console.log("[DEBUG] connected");
   }
-   sendMessage(msg, callback){
+  
+  handleSpotifyCommand(command){
+    console.log("[Cortex] received message: " + command)
+
+    if (command == "reset"){
+      console.log("resetting average");
+      this.resetAvg();
+    } 
+  }
+
+  sendMessage(msg, callback){
       let id = this.id_sequence
       this.id_sequence += 1;
       this.callbacks[id] = callback;
@@ -478,7 +488,7 @@ export default class Cortex extends React.Component{
             </br>
             <Button onClick={() => this.startSession()}>Start Session</Button>
             <Button onClick={() => this.closeSession()}>End Session</Button>
-            <Button onClick={() => this.tellSpotify("add")}>Tell spotify to add</Button>
+            <Button onClick={() => this.tellSpotify("addExc")}>Tell spotify to add</Button>
             <Button onClick={() => this.tellSpotify("skip")}>Tell spotify to skip</Button>
             </div>
         )
