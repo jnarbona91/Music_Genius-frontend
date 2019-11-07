@@ -21,29 +21,32 @@ export default class Spotify extends React.Component{
       duration: "",
       error: null,
       timer: 0,
+      search: ""
     }
-    this.getPlaying = this.getPlaying.bind(this)
+    this.getPlaying = this.getPlaying.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.publish = this.publish.bind(this);
   }
 
   handleCortexCommand(command){
     console.log("[Spotify] received message: " + command)
 
-    if (command == "addExc"){
+    if (command === "addExc"){
       this.excPlaylist();
     } 
-    if (command == "addEng"){
+    if (command === "addEng"){
       this.engPlaylist();
     }
-    if (command == "addFoc"){
+    if (command === "addFoc"){
       this.focPlaylist();
     }
-    if (command == "addStr"){
+    if (command === "addStr"){
       this.strPlaylist();
     }
-    if (command == "addInt"){
+    if (command === "addInt"){
       this.intPlaylist();
     }
-    if (command == "addRel"){
+    if (command === "addRel"){
       this.relPlaylist();
     }
   }
@@ -87,8 +90,14 @@ export default class Spotify extends React.Component{
   }
 
   getCurrentPlaylist(){
-    spotifyApi.getPlaylist(this.state.currentPlaylist)
+    spotifyApi.getUserPlaylists("melted_snowman2")
     .then((resp)=>{
+      console.log(resp.items)
+      let songNames = resp.items.map(function(item) { return { name: item.name }})
+      let playlistNames = songNames.find(e => e.name === this.state.search)
+      console.log(songNames)
+      console.log(playlistNames)
+      console.log(this.state.search)
       return resp
     })
   }
@@ -174,6 +183,16 @@ export default class Spotify extends React.Component{
     this.getPlaying();
   }
 
+  handleChange({target}){
+    this.setState({
+      [target.name]: target.value
+    })
+  }
+
+  publish(){
+    console.log(this.state.search)
+  }
+  
   render(){
     return(
       <div className="spotify-div">
@@ -211,6 +230,8 @@ export default class Spotify extends React.Component{
               </button>
             </div>
             <div>
+              <input type= "text" name="search" placeholder="Search Playlists" value={this.state.search} onChange={this.handleChange}/>
+              <button onClick={this.publish}>Search</button>
               <button onClick={()=> this.getCurrentPlaylist()}>
                 Retrieve Playlist
               </button>
