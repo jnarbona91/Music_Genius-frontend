@@ -46,6 +46,14 @@ export default class Spotify extends React.Component{
     if (command == "addRel"){
       this.relPlaylist();
     }
+    if (command == "skip"){
+      this.skipSong();
+    }
+  }
+
+  tellCortex = (command) => {
+    console.log("[Spotify] sending: " + command)
+    this.props.parentCallback(command);
   }
 
   //returns both request and access tokens
@@ -95,11 +103,13 @@ export default class Spotify extends React.Component{
 
   skipSong(){
     spotifyApi.skipToNext();
-    this.getPlaying();
+    this.tellCortex("reset");
+    return this.getPlaying();
   }
 
   prevSong(){ 
     spotifyApi.skipToPrevious();
+    this.tellCortex("reset");
       return this.getPlaying();
   }
 

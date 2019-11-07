@@ -32,7 +32,17 @@ export default class Cortex extends React.Component{
   handleOpen() {
     console.log("[DEBUG] connected");
   }
-   sendMessage(msg, callback){
+  
+  handleSpotifyCommand(command){
+    console.log("[Cortex] received message: " + command)
+
+    if (command == "reset"){
+      console.log("resetting average");
+      this.resetAvg();
+    } 
+  }
+
+  sendMessage(msg, callback){
       let id = this.id_sequence
       this.id_sequence += 1;
       this.callbacks[id] = callback;
@@ -130,7 +140,7 @@ export default class Cortex extends React.Component{
       "jsonrpc": "2.0",
       "method": "queryHeadsets",
       "params": {
-        "id": "EPOC-*"
+        "id": "INSIGHT-*"
       }
     };
     this.sendMessage(msg, this.queryHeadsets_callback);
@@ -226,7 +236,7 @@ export default class Cortex extends React.Component{
         "status": "active"
       }
     };
-       this.sendMessage(msg, this.startSession_callback); 
+    this.sendMessage(msg, this.startSession_callback); 
   }
 
   startSession_callback = (data) => {
@@ -310,6 +320,8 @@ export default class Cortex extends React.Component{
         }
       };
       this.sendMessage(msg, this.subscribe_callback);
+
+      this.getDetectionInfo();
     }
   }
 
@@ -340,6 +352,24 @@ export default class Cortex extends React.Component{
     console.log("Running callback for unsubscribe()");
     console.log(data);
     delete this.callbacks[data.id];
+  }
+
+  getDetectionInfo(){
+    //request for facial detection info
+    let msg = {
+      "id": this.id_sequence,
+      "jsonrpc": "2.0",
+      "method": "getDetectionInfo",
+      "params": {
+          "detection": "facialExpression"
+      }
+    };
+    this.sendMessage(msg, this.startSession_callback); 
+  }
+
+  getDetectionInfo_callback = (data) => {
+    console.log("Running callback for getDetectionInfo()");
+    console.log(data);
   }
 
   handleData(data) {
@@ -377,6 +407,9 @@ export default class Cortex extends React.Component{
     if (this.state.connected === true && this.state.session_connected === true){
       if (result.met !== undefined){
         this.handleMetData(result.met);
+      }
+      if (result.fac !== undefined){
+        this.handleFacData(result.fac);
       }
 
     }
@@ -416,6 +449,9 @@ export default class Cortex extends React.Component{
   //   } else{
   //     this.setState({eng: engAvg, exc: excAvg, str: strAvg, rel: relAvg, int: intAvg, foc: focAvg, numSamples: this.state.numSamples + 1});
   //   }
+    if (excAvg > 0.6){
+     this.tellSpotify("addExc") 
+    }
     if (engAvg > 0.6){
       this.tellSpotify("addEng")
     }
@@ -435,7 +471,12 @@ export default class Cortex extends React.Component{
     if ( focAvg > 0.6){
       this.tellSpotify("addFoc")
     }
+// need to store the current average and number of samples in state for next average calculation 
+    this.setState({eng: engAvg, exc: excAvg, str: strAvg, rel: relAvg, int: intAvg, foc: focAvg, numSamples: this.state.numSamples + 1});
+  }
 
+  handleFacData(data){
+    
   }
 
   resetAvg() {
@@ -478,8 +519,9 @@ export default class Cortex extends React.Component{
             </br>
             <Button onClick={() => this.startSession()}>Start Session</Button>
             <Button onClick={() => this.closeSession()}>End Session</Button>
-            <Button onClick={() => this.tellSpotify("add")}>Tell spotify to add</Button>
+            <Button onClick={() => this.tellSpotify("addExc")}>Tell spotify to add</Button>
             <Button onClick={() => this.tellSpotify("skip")}>Tell spotify to skip</Button>
+            <Button onClick={() => this.getDetectionInfo()}>Get trained facial command</Button>
             </div>
         )
     };
