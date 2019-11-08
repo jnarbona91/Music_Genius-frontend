@@ -21,7 +21,13 @@ export default class Spotify extends React.Component{
       duration: "",
       error: null,
       timer: 0,
-      search: ""
+      search: "",
+      focPlaylist: "",
+      strPlaylist: "",
+      engPlaylist: "",
+      excPlaylist: "",
+      intPlaylist: "",
+      relPlaylist: "",
     }
     this.getPlaying = this.getPlaying.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -88,14 +94,15 @@ export default class Spotify extends React.Component{
     })
     .catch((error)=> this.setState({error}))
   }
-
-  getCurrentPlaylist(){
-    spotifyApi.getUserPlaylists("melted_snowman2")
+  
+  setFocPlaylist(){
+    spotifyApi.getUserPlaylists(this.state.userId, {limit: 50})
     .then((resp)=>{
       console.log(resp.items)
       let songNames = resp.items.map(function(item) { return { name: item.name }})
       let playlistNames = songNames.find(e => e.name === this.state.search)
       let fullPlaylist = resp.items.find(e => e.name === this.state.search)
+      this.setState({focPlaylist: fullPlaylist.id})
       console.log(fullPlaylist.id)
       console.log(songNames)
       console.log(playlistNames)
@@ -103,6 +110,67 @@ export default class Spotify extends React.Component{
       return resp
     })
   }
+
+  setExcPlaylist(){
+    spotifyApi.getUserPlaylists(this.state.userId, {limit: 50})
+    .then((resp)=>{
+      console.log(resp.items)
+      let songNames = resp.items.map(function(item) { return { name: item.name }})
+      let playlistNames = songNames.find(e => e.name === this.state.search)
+      let fullPlaylist = resp.items.find(e => e.name === this.state.search)
+      this.setState({excPlaylist: fullPlaylist.id})
+      return resp
+    })
+  }
+
+  setEngPlaylist(){
+    spotifyApi.getUserPlaylists(this.state.userId, {limit: 50})
+    .then((resp)=>{
+      console.log(resp.items)
+      let songNames = resp.items.map(function(item) { return { name: item.name }})
+      let playlistNames = songNames.find(e => e.name === this.state.search)
+      let fullPlaylist = resp.items.find(e => e.name === this.state.search)
+      this.setState({engPlaylist: fullPlaylist.id})
+      return resp
+    })
+  }
+
+  setStrPlaylist(){
+    spotifyApi.getUserPlaylists(this.state.userId, {limit: 50})
+    .then((resp)=>{
+      console.log(resp.items)
+      let songNames = resp.items.map(function(item) { return { name: item.name }})
+      let playlistNames = songNames.find(e => e.name === this.state.search)
+      let fullPlaylist = resp.items.find(e => e.name === this.state.search)
+      this.setState({strPlaylist: fullPlaylist.id})
+      return resp
+    })
+  }
+
+  setIntPlaylist(){
+    spotifyApi.getUserPlaylists(this.state.userId, {limit: 50})
+    .then((resp)=>{
+      console.log(resp.items)
+      let songNames = resp.items.map(function(item) { return { name: item.name }})
+      let playlistNames = songNames.find(e => e.name === this.state.search)
+      let fullPlaylist = resp.items.find(e => e.name === this.state.search)
+      this.setState({intPlaylist: fullPlaylist.id})
+      return resp
+    })
+  }
+
+  setRelPlaylist(){
+    spotifyApi.getUserPlaylists(this.state.userId, {limit: 50})
+    .then((resp)=>{
+      console.log(resp.items)
+      let songNames = resp.items.map(function(item) { return { name: item.name }})
+      let playlistNames = songNames.find(e => e.name === this.state.search)
+      let fullPlaylist = resp.items.find(e => e.name === this.state.search)
+      this.setState({relPlaylist: fullPlaylist.id})
+      return resp
+    })
+  }
+
 
   skipSong(){
     spotifyApi.skipToNext();
@@ -150,10 +218,10 @@ export default class Spotify extends React.Component{
   }
 
   focPlaylist(){
-      return spotifyApi.addTracksToPlaylist("5TOheLold9VEiIUcljAQlK",  [this.state.nowPlaying.uri]);
+      return spotifyApi.addTracksToPlaylist("this.state.focPlaylist",  [this.state.nowPlaying.uri]);
   }
 
-  createNewPlaylist(userId = "melted_snowman", playListName="New Playlist"){
+  createNewPlaylist(userId = this.state.userId, playListName="New Playlist"){
     spotifyApi.createPlaylist(userId, { name: playListName})
     .then((resp)=>{
       console.log(resp)
@@ -164,8 +232,9 @@ export default class Spotify extends React.Component{
   getUserId(){
     spotifyApi.getMe()
     .then((resp)=>{
+      console.log(resp.display_name)
       this.setState({
-        userId: resp.id
+        userId: resp.display_name
       })
     })
     .catch((error)=> this.setState({error}))
@@ -183,6 +252,7 @@ export default class Spotify extends React.Component{
 
   componentDidMount(){
     this.getPlaying();
+    this.getUserId();
   }
 
   handleChange({target}){
@@ -234,8 +304,35 @@ export default class Spotify extends React.Component{
             <div>
               <input type= "text" name="search" placeholder="Search Playlists" value={this.state.search} onChange={this.handleChange}/>
               <button onClick={this.publish}>Search</button>
-              <button onClick={()=> this.getCurrentPlaylist()}>
-                Retrieve Playlist
+            </div>
+            <div>
+              <button onClick={()=> this.setFocPlaylist()}>
+                Set As Focus Playlist
+              </button>
+            </div>
+            <div>
+              <button onClick={()=> this.setEngPlaylist()}>
+                Set as Eng Playlist
+              </button>
+            </div>
+            <div>
+              <button onClick={()=> this.setExcPlaylist()}>
+                Set as Exc Playlist
+              </button>
+            </div>
+            <div>
+              <button onClick={()=> this.setStrPlaylist()}>
+                Set as Str Playlist
+              </button>
+            </div>
+            <div>
+              <button onClick={()=> this.setIntPlaylist()}>
+                Set as Int Playlist
+              </button>
+            </div>
+            <div>
+              <button onClick={()=> this.setRelPlaylist()}>
+                Set as Rel Playlist
               </button>
             </div>
           </div>
