@@ -95,6 +95,8 @@ export default class Spotify extends React.Component{
       console.log(resp.items)
       let songNames = resp.items.map(function(item) { return { name: item.name }})
       let playlistNames = songNames.find(e => e.name === this.state.search)
+      let fullPlaylist = resp.items.find(e => e.name === this.state.search)
+      console.log(fullPlaylist.id)
       console.log(songNames)
       console.log(playlistNames)
       console.log(this.state.search)
