@@ -34,7 +34,7 @@ export default class Genius extends React.Component{
             <div>
                 <Cortex ref="cortexComponent" parentCallback = {this.cortexCallback}/>
                 <Spotify ref="spotifyComponent" parentCallback = {this.spotifyCallback} eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions} dataFromCortex = {this.state.cortexMessage}/>
-                <Graph eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions}/>
+                {/* <Graph eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions}/> */}
             </div>
             
         );

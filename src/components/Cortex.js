@@ -14,14 +14,15 @@ export default class Cortex extends React.Component{
         callbacks: {},  // keys are id_sequence, values are callbacks
         session_id: "",
         session_connected: false,
-        all_streams: [ "met"],
+        all_streams: [ "met", "fac"],
         eng: 0,
         exc: 0,
         str: 0,
         rel: 0,
         int: 0,
         foc: 0,
-        numSamples: 0
+        numSamples: 0,
+        prevEyeAction: "neutral"
       };
     
     this.callbacks = {};  // keys are id_sequence, values are callbacks
@@ -140,7 +141,7 @@ export default class Cortex extends React.Component{
       "jsonrpc": "2.0",
       "method": "queryHeadsets",
       "params": {
-        "id": "INSIGHT-*"
+        "id": "EPOC-*"
       }
     };
     this.sendMessage(msg, this.queryHeadsets_callback);
@@ -304,6 +305,7 @@ export default class Cortex extends React.Component{
          session_connected: false
     });
     delete this.callbacks[data.id];
+    this.unsubscribe();
   }
 
   // streams has default value of all streams; if user does not specify streams, all_streams will be subscribed
@@ -320,8 +322,6 @@ export default class Cortex extends React.Component{
         }
       };
       this.sendMessage(msg, this.subscribe_callback);
-
-      this.getDetectionInfo();
     }
   }
 
@@ -476,7 +476,12 @@ export default class Cortex extends React.Component{
   }
 
   handleFacData(data){
-    
+    let currentEyeAction = data[0];
+    if ((currentEyeAction === "winkL" || currentEyeAction === "winkR") && currentEyeAction !== this.state.prevEyeAction){
+      console.log("userWinked");
+      this.tellSpotify("skip");
+    }
+    this.setState({prevEyeAction: currentEyeAction});
   }
 
   resetAvg() {
