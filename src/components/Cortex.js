@@ -1,6 +1,7 @@
 import React from "react";
 import Websocket from "react-websocket";
 import { Button } from "reactstrap"
+import Graph from './Graph'
 
 export default class Cortex extends React.Component{
   constructor(props) {
@@ -22,7 +23,8 @@ export default class Cortex extends React.Component{
         int: 0,
         foc: 0,
         numSamples: 0,
-        prevEyeAction: "neutral"
+        prevEyeAction: "neutral",
+        prev2EyeAction: "neutral"
       };
     
     this.callbacks = {};  // keys are id_sequence, values are callbacks
@@ -477,11 +479,11 @@ export default class Cortex extends React.Component{
 
   handleFacData(data){
     let currentEyeAction = data[0];
-    if ((currentEyeAction === "winkL" || currentEyeAction === "winkR") && currentEyeAction !== this.state.prevEyeAction){
+    if ((currentEyeAction === "winkL" || currentEyeAction === "winkR") && currentEyeAction === this.state.prevEyeAction && currentEyeAction !== this.state.prev2EyeAction){
       console.log("userWinked");
       this.tellSpotify("skip");
     }
-    this.setState({prevEyeAction: currentEyeAction});
+    this.setState({prevEyeAction: this.state.currentEyeAction, prev2EyeAction: this.state.prevEyeAction});
   }
 
   resetAvg() {
@@ -527,6 +529,7 @@ export default class Cortex extends React.Component{
             <Button onClick={() => this.tellSpotify("addExc")}>Tell spotify to add</Button>
             <Button onClick={() => this.tellSpotify("skip")}>Tell spotify to skip</Button>
             <Button onClick={() => this.getDetectionInfo()}>Get trained facial command</Button>
+            <Graph eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions}/>
             </div>
         )
     };
