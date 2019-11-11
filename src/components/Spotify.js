@@ -55,7 +55,7 @@ export default class Spotify extends React.Component{
     if (command === "addRel"){
       this.relPlaylist();
     }
-    if (command == "skip"){
+    if (command === "skip"){
       this.skipSong();
     }
   }

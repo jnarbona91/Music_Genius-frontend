@@ -39,7 +39,7 @@ export default class Cortex extends React.Component{
   handleSpotifyCommand(command){
     console.log("[Cortex] received message: " + command)
 
-    if (command == "reset"){
+    if (command === "reset"){
       console.log("resetting average");
       this.resetAvg();
     } 
@@ -436,7 +436,7 @@ export default class Cortex extends React.Component{
 
     //if certain average exceeds arbitrary threshold, tell spotify to add current song to playlist, if average goes below low threshold, skip skip, meaning in either case, play next song, then reset all averages and sample count.
 
-    let skipSong = false;
+    // let skipSong = false;
 
   //   if (excAvg > 0.6){
   //     this.tellSpotify("addExc") //did not find a generic add playlist function, but in this case exc is also the metric we are tracking so it'll do.

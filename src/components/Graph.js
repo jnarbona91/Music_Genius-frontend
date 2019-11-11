@@ -12,7 +12,7 @@ export default class Graph extends React.Component{
     const { eng, exc, str, rel, int, foc, } = this.props
     const currentProps = [ eng, exc, str, rel, int, foc]
     console.log(prevProps)
-    if(prevProps != currentProps){
+    if(prevProps !== currentProps){
       this.drawBarChart(currentProps)
     }
   }
