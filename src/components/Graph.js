@@ -1,36 +1,41 @@
 import React from 'react'
 import * as d3 from 'd3'
+import { updateExpression } from '@babel/types';
+import { selector } from 'postcss-selector-parser';
 
 export default class Graph extends React.Component{
-  componentDidMount(){
-    const { eng, exc, str, rel, int, foc, } = this.props
-    const performanceMetrics = [ eng, 60, exc, 60, str, 60, rel, 60, int, 60, foc, 60]
-    this.drawBarChart(performanceMetrics)
+  constructor(props){
+    super(props)
+    this.drawBarChart = this.drawBarChart.bind(this);
   }
 
-  componentDidUpdate(prevProps){
-    const { eng, exc, str, rel, int, foc, } = this.props
-    const currentProps = [ eng, exc, str, rel, int, foc]
-    console.log(prevProps)
-    if(prevProps != currentProps){
-      this.drawBarChart(currentProps)
-    }
+  componentDidMount(){  
+    this.drawBarChart()
   }
 
-  drawBarChart(performanceMetrics){
+  componentDidUpdate(){
+    d3.selectAll('svg').remove()
+    this.drawBarChart()
+  }
+
+  drawBarChart(){
+    const { eng, exc, int, rel, foc, str } = this.props
+    let performance = [eng, exc, int, rel, foc, str]
     const svgGraph = d3.select(this.refs.graph)
       .append("svg")
       .attr("width", 500)
       .attr("height", 150)
       .style("border", "1px solid black")
     svgGraph.selectAll("rect")
-      .data(performanceMetrics).enter()
+      .data(performance).enter()
         .append("rect")
         .attr("width", 15)
         .attr("height", (datapoint) => datapoint * 1000)
         .attr("fill", "gray")
         .attr("x", (datapoint, iteration) => iteration * 40)
         .attr("y", (datapoint) => 150 - datapoint  )
+    svgGraph.selectAll('rect')
+      .data(performance).exit().remove()
   }
 
   render(){
