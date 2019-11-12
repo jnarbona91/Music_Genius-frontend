@@ -233,7 +233,7 @@ export default class Spotify extends React.Component{
     })
     .catch((error)=> this.setState({error}))
   }
-
+  
   getUserId(){
     spotifyApi.getMe()
     .then((resp)=>{

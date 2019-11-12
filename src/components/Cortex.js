@@ -1,7 +1,7 @@
 import React from "react";
 import Websocket from "react-websocket";
 import { Button } from "reactstrap"
-import Graph from './Graph'
+
 
 export default class Cortex extends React.Component{
   constructor(props) {
@@ -436,21 +436,6 @@ export default class Cortex extends React.Component{
 
     //if certain average exceeds arbitrary threshold, tell spotify to add current song to playlist, if average goes below low threshold, skip skip, meaning in either case, play next song, then reset all averages and sample count.
 
-    // let skipSong = false;
-
-  //   if (excAvg > 0.6){
-  //     this.tellSpotify("addExc") //did not find a generic add playlist function, but in this case exc is also the metric we are tracking so it'll do.
-  //     console.log("LOVE IT!");
-  //     skipSong = true;
-  //   } if (strAvg > 0.5 || (engAvg < 0.3 && excAvg < 0.5)){
-  //     console.log("HATE IT!");
-  //     skipSong = true;
-  //   } if (skipSong === true){
-  //     this.tellSpotify("skip")
-  //     //this.setState({eng: 0, exc: 0, str: 0, rel: 0, int: 0, foc: 0, numSamples: 0});
-  //   } else{
-  //     this.setState({eng: engAvg, exc: excAvg, str: strAvg, rel: relAvg, int: intAvg, foc: focAvg, numSamples: this.state.numSamples + 1});
-  //   }
     if (excAvg > 0.6){
      this.tellSpotify("addExc") 
     }
@@ -474,8 +459,10 @@ export default class Cortex extends React.Component{
       this.tellSpotify("addFoc")
     }
 // need to store the current average and number of samples in state for next average calculation 
+    this.props.graphCallback(data[1], data[3], data[6], data[8], data[10], data[12]);
     this.setState({eng: engAvg, exc: excAvg, str: strAvg, rel: relAvg, int: intAvg, foc: focAvg, numSamples: this.state.numSamples + 1});
   }
+
 
   handleFacData(data){
     let currentEyeAction = data[0];
@@ -529,7 +516,7 @@ export default class Cortex extends React.Component{
             <Button onClick={() => this.tellSpotify("addExc")}>Tell spotify to add</Button>
             <Button onClick={() => this.tellSpotify("skip")}>Tell spotify to skip</Button>
             <Button onClick={() => this.getDetectionInfo()}>Get trained facial command</Button>
-            <Graph eng={this.state.eng} exc={this.state.exc} str={this.state.str} rel={this.state.rel} int={this.state.int} foc={this.state.foc} sessions={this.startSessions}/>
+           
             </div>
         )
     };
