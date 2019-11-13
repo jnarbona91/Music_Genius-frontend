@@ -6,12 +6,6 @@ import { selector } from 'postcss-selector-parser';
 export default class Graph extends React.Component{
   constructor(props){
     super(props)
-      this.state={
-        performance: {
-          eng: '',
-          exc: ''
-        }
-      }
     this.drawBarChart = this.drawBarChart.bind(this);
   }
 
@@ -41,10 +35,11 @@ export default class Graph extends React.Component{
 
     svgGraph.append('g')
       .attr('class', 'axis x')
-      .call(d3.axisTop(xScale))
+      .attr('transform', 'translate(0,' + (150) + ')')
+      .call(d3.axisBottom(xScale))
       .selectAll('text')
       .attr('dy', null)
-      .attr("transform", "translate(-30, 150)")  
+      .attr("transform", "translate(0, 10)")  
       
     const yScale = d3.scaleLinear()
       .range([150, 10])
@@ -54,7 +49,6 @@ export default class Graph extends React.Component{
       .attr('class', 'axis y')
       .call(d3.axisRight(yScale))
       .selectAll('text')
-      .attr("transform", "translate(0," + 150 + ")")
       .attr("transform", "translate(20, 0)rotate(0)")
     
     
@@ -62,10 +56,10 @@ export default class Graph extends React.Component{
       .data(performance).enter()
         .append("rect")
         .attr("width", 15)
-        .attr("height", (datapoint) => datapoint * 100)
+        .attr("height", (performance) => performance * 100)
         .attr("fill", "gray")
-        .attr("x", datapoint => xScale(datapoint))
-        .attr("y", (datapoint) => 150 - datapoint  ) 
+        .attr("x", performance => xScale(performance))
+        .attr("y", (performance) => 150 - performance  ) 
     svgGraph.selectAll('rect')
       .data(performance).exit().remove()
   }
