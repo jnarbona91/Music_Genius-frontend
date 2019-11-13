@@ -3,37 +3,32 @@ import Websocket from "react-websocket";
 import { Button } from "reactstrap"
 
 
+var clientId = "zrTtgE4m4XN2z74UC5wRXOMEfqqtT20glr0rJf08";
+var clientSecret = "UyNffuiGrWOIUJfrUrqJeiAbVAsgNm7Tyw58AVbYkKEGI4l5MPzKo56K0vvuoWOjgujx5YNoc6CcJvZxOxgICsAjwsy63AF4gfvq9a68fdvY4YgOzafRXeqjWwAbYymK";
 export default class Cortex extends React.Component{
+
   constructor(props) {
     super(props);
-      this.state = {
-        token: "", //storing cortext token for authentication
-        method: "", //storing the last request method so we know how to handle the response
-        headset: "", //storing the headset id
-        connected: false,
-        id_sequence: 1,  // sequence for websocket calls
-        callbacks: {},  // keys are id_sequence, values are callbacks
-        session_id: "",
-        session_connected: false,
-        all_streams: [ "met", "fac"],
-        eng: 0,
-        exc: 0,
-        str: 0,
-        rel: 0,
-        int: 0,
-        foc: 0,
-        numSamples: 0,
-        prevEyeAction: "neutral",
-        prev2EyeAction: "neutral"
-      };
+    this.token = ""; //storing cortext token for authentication
+    this.headset = ""; //storing the headset id
+    this.connected = false;
+    this.id_sequence = 1;  // sequence for websocket calls
+    this.callbacks = {};  // keys are id_sequence, values are callbacks
+    this.session_id = "";
+    this.session_connected = false;
+    this.all_streams = [ "met", "fac"];
+    this.metrics = {eng: 0, exc: 0, str: 0, rel: 0, intt: 0, foc: 0};
+    this.numSamples = 0;
+    this.prevEyeAction = "neutral";
+    this.prev2EyeAction = "neutral";
+    this.refWebSocket = null;
     
-    this.callbacks = {};  // keys are id_sequence, values are callbacks
-    this.id_sequence = 1;  // sequence for websocket calls
     this.handleData = this.handleData.bind(this);
   }
 
   handleOpen() {
-    console.log("[DEBUG] connected");
+    console.log("[DEBUG] websocket connected");
+    // MSB: Could trigger configuration and setup from here?
   }
   
   handleSpotifyCommand(command){
@@ -45,25 +40,27 @@ export default class Cortex extends React.Component{
     } 
   }
 
-  sendMessage(msg, callback){
+  sendMessage(method, params, callback){
       let id = this.id_sequence
       this.id_sequence += 1;
+      let msg = {
+          'jsonrpc': '2.0',
+          'method': method,
+          'id': id};
+      if (params !== null) { 
+          msg.params = params;
+      }
       this.callbacks[id] = callback;
-      //console.log(msg);
       this.refWebSocket.sendMessage(JSON.stringify(msg));
   }
     
+
   sendHello(){
     // Grab the current id_sequence and increment
     // let id = this.id_sequence;
     // this.id_sequence += 1;
     // this.callbacks[id] = this.hello_callback;set up our callback
-    let msg = {
-      "jsonrpc": "2.0",
-      "method": "getCortexInfo",
-      "id":this.id_sequence
-    }
-    this.sendMessage(msg, this.hello_callback);
+    this.sendMessage("getCortexInfo", null, this.hello_callback);
   }
 
   hello_callback = (data) => {
@@ -74,12 +71,7 @@ export default class Cortex extends React.Component{
   }
 
   getUserLogin(){
-    let msg = {
-      "jsonrpc": "2.0",
-      "method": "getUserLogin",
-      "id":this.id_sequence
-    }
-    this.sendMessage(msg, this.userLogin_callback);
+    this.sendMessage("getUserLogin", null, this.userLogin_callback);
   }
 
   userLogin_callback = (data) => {
@@ -91,16 +83,11 @@ export default class Cortex extends React.Component{
   }
 
   getRequestAccess(){
-    let msg = {
-      "id":this.id_sequence,
-      "jsonrpc": "2.0",
-      "method": "requestAccess",
-      "params": {
-        "clientId": "zrTtgE4m4XN2z74UC5wRXOMEfqqtT20glr0rJf08",
-        "clientSecret": "UyNffuiGrWOIUJfrUrqJeiAbVAsgNm7Tyw58AVbYkKEGI4l5MPzKo56K0vvuoWOjgujx5YNoc6CcJvZxOxgICsAjwsy63AF4gfvq9a68fdvY4YgOzafRXeqjWwAbYymK"
-      }
-    }
-    this.sendMessage(msg, this.requestAccess_callback);
+    let params = {
+        "clientId": clientId,
+        "clientSecret": clientSecret
+      };
+    this.sendMessage("requestAccess", params, this.requestAccess_callback);
   }
 
   requestAccess_callback = (data) => {
@@ -112,56 +99,37 @@ export default class Cortex extends React.Component{
   }
 
   getAuthentication(){
-    let msg = {
-      "id": this.id_sequence,
-      "jsonrpc": "2.0",
-      "method": "authorize",
-      "params": {
-        "clientId": "zrTtgE4m4XN2z74UC5wRXOMEfqqtT20glr0rJf08",
-        "clientSecret": "UyNffuiGrWOIUJfrUrqJeiAbVAsgNm7Tyw58AVbYkKEGI4l5MPzKo56K0vvuoWOjgujx5YNoc6CcJvZxOxgICsAjwsy63AF4gfvq9a68fdvY4YgOzafRXeqjWwAbYymK"
-      }
-    }
-    this.sendMessage(msg, this.authentication_callback);
+    let params = {
+        "clientId": clientId,
+        "clientSecret": clientSecret
+      };
+    this.sendMessage("authorize", params, this.authentication_callback);
   }
 
   authentication_callback = (data) => {
     console.log("Running callback for authentication()");
     console.log(data);
-      this.setState({
-        token: data.result.cortexToken
-    })
+    this.token = data.result.cortexToken;
       
-    console.log("[DEBUG] received token = " + this.state.token)
+    console.log("[DEBUG] received token = " + this.token)
     // remove callback from callbacks object
     delete this.callbacks[data.id];
     this.queryHeadsets();
   }
 
   queryHeadsets(){
-    let msg = {
-      "id":this.id_sequence,
-      "jsonrpc": "2.0",
-      "method": "queryHeadsets",
-      "params": {
-        "id": "EPOC-*"
-      }
-    };
-    this.sendMessage(msg, this.queryHeadsets_callback);
+    let params = { "id": "EPOC-*" };
+    this.sendMessage("queryHeadsets", params, this.queryHeadsets_callback);
   }
 
   queryHeadsets_callback = (data) => {
     console.log("Running callback for queryHeadset()");
     console.log(data);
     if (data.result.length > 0){
-      this.setState({
-          headset: data.result[0].id
-    })
-        
-      console.log("[DEBUG] headset id is: " + this.state.headset);
-    }else{
-      this.setState({
-           headset: ""
-      })
+      this.headset = data.result[0].id;
+      console.log("[DEBUG] headset id is: " + this.headset);
+    } else {
+      this.headset = '';
       console.log("[DEBUG] no headsets found");
     }
     // remove callback from callbacks object
@@ -170,37 +138,30 @@ export default class Cortex extends React.Component{
   }
 
   connectHeadset(){
-    if (this.state.headset !== ""){
-      let msg = {
-        "id":this.id_sequence,
-        "jsonrpc": "2.0",
-        "method": "controlDevice",
-        "params": {
-          "command": "connect",
-          "headset": this.state.headset
-        }
-      };
-      console.log(msg);
-      this.sendMessage(msg, this.controlDevice_callback);
+    if (this.headset === ""){
+        return;  // no headset available?
     }
+    let params = {
+        "command": "connect",
+        "headset": this.headset
+    };
+    this.sendMessage("controlDevice", params, this.controlDevice_callback);
   }
 
   disconnectHeadset(){
-    if (this.state.connected === true){ //check if app is actually connected
-      if (this.state.headset !== ""){
-        let msg = {
-          "id": this.id_sequence,
-          "jsonrpc": "2.0",
-          "method": "controlDevice",
-          "params": {
-            "command": "disconnect",
-            "headset": this.state.headset            }
-          };
-        this.sendMessage(msg, this.controlDevice_callback);
-      }
-    }else{
-      console.log("Already disconnected, please connect first!")
+    if (this.connected !== true){ //check if app is actually connected
+        console.log("Already disconnected, please connect first!")
+        return;
     }
+    if (this.headset === ""){
+        console.log("No headset available?");
+        return;
+    }
+    let params = {
+        "command": "disconnect",
+        "headset": this.headset
+    };
+    this.sendMessage("controlDevice", params, this.controlDevice_callback);
   }
 
   controlDevice_callback = (data) => {
@@ -211,14 +172,10 @@ export default class Cortex extends React.Component{
     } else {
       if (data.result.command === "connect"){
         console.log("connected!!!");
-         this.setState({
-              connected: true
-        });
+        this.connected = true;
       }else if (data.result.command === "disconnect"){
         console.log("disconnected. :(");
-         this.setState({
-             connected: false
-        });
+        this.connected = false;
       }else { //refresh
         console.log("refresh request was called, not sure what we do with that.")
       }
@@ -229,17 +186,12 @@ export default class Cortex extends React.Component{
 
 
   startSession(){
-    let msg = {
-      "id": this.id_sequence,
-      "jsonrpc": "2.0",
-      "method": "createSession",
-      "params": {
-        "cortexToken": this.state.token,
-        "headset": this.state.headset,
+    let params = {
+        "cortexToken": this.token,
+        "headset": this.headset,
         "status": "active"
-      }
     };
-    this.sendMessage(msg, this.startSession_callback); 
+    this.sendMessage("createSession", params, this.startSession_callback); 
   }
 
   startSession_callback = (data) => {
@@ -247,12 +199,10 @@ export default class Cortex extends React.Component{
     console.log(data);
     if (data.error){
       console.log("error starting session: " + data.error.message);
-    }else {
-       this.setState({
-            session_id: data.result.id,
-            session_connected: true
-      })
-      console.log(`Session id is ${this.state.session_id}`);
+    } else {
+      this.session_id = data.result.id;
+      this.session_connected = true;
+      console.log(`Session id is ${this.session_id}`);
       this.subscribe();
     }
     delete this.callbacks[data.id];
@@ -282,20 +232,14 @@ export default class Cortex extends React.Component{
 
 
   closeSession(){
-    if (this.state.session_connected === true){
-          let msg = {
-                      "id":this.id_sequence,
-                      "jsonrpc": "2.0",
-                      "method": "updateSession",
-                      "params": {
-                          "cortexToken": this.state.token,
-                          "session": this.state.session_id,
-                          "status": "close"
-              }
-          
-                   };
-                  this.sendMessage(msg, this.closeSession_callback);
-    }else{
+    if (this.session_connected === true){
+        let params = {
+            "cortexToken": this.token,
+            "session": this.session_id,
+            "status": "close"
+        };
+        this.sendMessage("updateSession", params, this.closeSession_callback);
+    } else {
       console.log("There is currently no active session");
     }
   }
@@ -303,27 +247,20 @@ export default class Cortex extends React.Component{
   closeSession_callback = (data) => {
     console.log("Running callback for closeSession()");
     console.log(data);
-    this.setState({
-         session_connected: false
-    });
+    this.session_connected = false;
     delete this.callbacks[data.id];
     this.unsubscribe();
   }
 
   // streams has default value of all streams; if user does not specify streams, all_streams will be subscribed
-  subscribe(streams = this.state.all_streams){
-    if (this.state.connected === true && this.state.session_connected === true){
-      let msg = {
-        "id": this.id_sequence,
-        "jsonrpc": "2.0",
-        "method": "subscribe",
-        "params": {
-          "cortexToken": this.state.token,
-          "session": this.state.session_id,
+  subscribe(streams = this.all_streams){
+    if (this.connected === true && this.session_connected === true){
+      let params = {
+          "cortexToken": this.token,
+          "session": this.session_id,
           "streams": streams
-        }
       };
-      this.sendMessage(msg, this.subscribe_callback);
+      this.sendMessage("subscribe", params, this.subscribe_callback);
     }
   }
 
@@ -334,19 +271,13 @@ export default class Cortex extends React.Component{
   }
 
   unsubscribe(){
-    if (this.state.connected === true && this.state.session_connected === true){
-      let msg = {
-        "id": this.id_sequence,
-        "jsonrpc": "2.0",
-        "method": "unsubscribe",
-        "params": {
-          "cortexToken": this.state.token,
-          "session": this.state.session_id,
-          "streams": this.state.all_streams
-
-        }
+    if (this.connected === true && this.session_connected === true){
+      let params = {
+          "cortexToken": this.token,
+          "session": this.session_id,
+          "streams": this.all_streams
       };
-      this.sendMessage(msg, this.unsubscribe_callback);
+      this.sendMessage("unsubscribe", params, this.unsubscribe_callback);
     }
   }
 
@@ -358,15 +289,10 @@ export default class Cortex extends React.Component{
 
   getDetectionInfo(){
     //request for facial detection info
-    let msg = {
-      "id": this.id_sequence,
-      "jsonrpc": "2.0",
-      "method": "getDetectionInfo",
-      "params": {
-          "detection": "facialExpression"
-      }
+    let params = {
+        "detection": "facialExpression"
     };
-    this.sendMessage(msg, this.startSession_callback); 
+    this.sendMessage("getDetectionInfo", params, this.startSession_callback); 
   }
 
   getDetectionInfo_callback = (data) => {
@@ -382,10 +308,10 @@ export default class Cortex extends React.Component{
     // let relArray = [];
     // let intArray = [];
     // let focArray = [];
-    console.log(result);
+    //console.log(result);
     if (result.id){
       // call the registered callback
-      console.log("executing callback for id = " + result.id);
+      //console.log("executing callback for id = " + result.id);
       this.callbacks[result.id](result);
     }
     // if (this.state.connected === true && this.state.session_connected === true && result.met !== undefined){
@@ -406,7 +332,7 @@ export default class Cortex extends React.Component{
     // console.log(intMath);
     // console.log(focMath);
 
-    if (this.state.connected === true && this.state.session_connected === true){
+    if (this.connected === true && this.session_connected === true){
       if (result.met !== undefined){
         this.handleMetData(result.met);
       }
@@ -420,61 +346,48 @@ export default class Cortex extends React.Component{
   handleMetData(data){
     //console.log(data);
     //update averages
-    let engAvg = (this.state.eng * this.state.numSamples + data[1])/(this.state.numSamples + 1);
-    let excAvg = (this.state.exc * this.state.numSamples + data[3])/(this.state.numSamples + 1);
-    let strAvg = (this.state.str * this.state.numSamples + data[6])/(this.state.numSamples + 1);
-    let relAvg = (this.state.rel * this.state.numSamples + data[8])/(this.state.numSamples + 1);
-    let intAvg = (this.state.int * this.state.numSamples + data[10])/(this.state.numSamples + 1);
-    let focAvg = (this.state.foc * this.state.numSamples + data[12])/(this.state.numSamples + 1);
+    let indexes = {eng: 1, exc: 3, str: 6, rel: 8, intt: 10, foc: 12};
+    ['eng', 'exc', 'str', 'rel', 'intt', 'foc'].forEach((met) => {
+        let new_val = data[indexes[met]];
+        let avg = (this.metrics[met] * this.numSamples + new_val) / 
+            (this.numSamples + 1);
+        this.metrics[met] = avg;
 
-    console.log("eng = " + engAvg);
-    console.log("exc = " + excAvg);
-    console.log("str = " + strAvg);
-    console.log("rel = " + relAvg);
-    console.log("int = " + intAvg);
-    console.log("foc = " + focAvg);
+        //if certain average exceeds arbitrary threshold, tell spotify to add
+        //current song to playlist, if average goes below low threshold, skip
+        //skip, meaning in either case, play next song, then reset all averages
+        //and sample count.
+        if (avg > 0.6) {
+            let cmd = 'add' + met;
+            this.tellSpotify(cmd);
+        }
 
-    //if certain average exceeds arbitrary threshold, tell spotify to add current song to playlist, if average goes below low threshold, skip skip, meaning in either case, play next song, then reset all averages and sample count.
+        console.log(met, " = ", avg);
+    });
+    this.numSamples += 1;
 
-    if (excAvg > 0.6){
-     this.tellSpotify("addExc") 
-    }
-    if (engAvg > 0.6){
-      this.tellSpotify("addEng")
-    }
-
-    if (strAvg > 0.6){
-      this.tellSpotify("addStr")
-    }
-
-    if (intAvg > 0.6){
-      this.tellSpotify("addInt")
-    }
-
-    if ( relAvg > 0.6){
-      this.tellSpotify("addRel")
-    }
-
-    if ( focAvg > 0.6){
-      this.tellSpotify("addFoc")
-    }
-// need to store the current average and number of samples in state for next average calculation 
+    // need to store the current average and number of samples in state for next
+    // average calculation 
+    // MSB: there must be a better way??
     this.props.graphCallback(data[1], data[3], data[6], data[8], data[10], data[12]);
-    this.setState({eng: engAvg, exc: excAvg, str: strAvg, rel: relAvg, int: intAvg, foc: focAvg, numSamples: this.state.numSamples + 1});
   }
-
 
   handleFacData(data){
     let currentEyeAction = data[0];
-    if ((currentEyeAction === "winkL" || currentEyeAction === "winkR") && currentEyeAction === this.state.prevEyeAction && currentEyeAction !== this.state.prev2EyeAction){
+    if ((currentEyeAction === "winkL" || currentEyeAction === "winkR")
+        && currentEyeAction === this.prevEyeAction
+        && currentEyeAction !== this.prev2EyeAction){
       console.log("userWinked");
       this.tellSpotify("skip");
     }
-    this.setState({prevEyeAction: this.state.currentEyeAction, prev2EyeAction: this.state.prevEyeAction});
+    this.prev2EyeAction = this.prevEyeAction;
+    this.prevEyeAction = currentEyeAction;
+    //this.setState({prevEyeAction: this.state.currentEyeAction, prev2EyeAction: this.state.prevEyeAction});
   }
 
   resetAvg() {
-    this.setState({eng: 0, exc: 0, str: 0, rel: 0, int: 0, foc: 0, numSamples: 0});
+    this.metrics = {
+        eng: 0, exc: 0, str: 0, rel: 0, intt: 0, foc: 0, numSamples: 0};
   }
 
   tellSpotify = (command) => {
@@ -519,5 +432,5 @@ export default class Cortex extends React.Component{
            
             </div>
         )
-    };
-}
+    }
+  }
