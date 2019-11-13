@@ -45,6 +45,7 @@ export default class Spotify extends React.Component{
 
     if(command.startsWith('add')) { 
         let plName = command.substring(3);  //strip the add
+        console.log("adding to pl " + plName);
         this.addPlaylist(plName);
     }
     /* MSB: No longer needed
@@ -116,6 +117,8 @@ export default class Spotify extends React.Component{
   }
 
   setPlaylist(plName){
+    console.log("plName = ",plName);
+    console.log("playlist object = " + this.state.playlists[plName]);
     spotifyApi.getUserPlaylists(this.state.userId, {limit: 50})
     .then((resp)=>{
       console.log(resp.items)
@@ -124,8 +127,16 @@ export default class Spotify extends React.Component{
       });
       let playlistNames = songNames.find(e => e.name === this.state.search)
       let fullPlaylist = resp.items.find(e => e.name === this.state.search)
-      this.setState({playlists[plName]:
-                     {id: fullPlaylist.id, name: fullPlaylist.name}});
+      // this.setState({playlists[plName]:
+      //                {id: fullPlaylist.id, name: fullPlaylist.name}});
+
+      this.setState(state => {
+        state.playlists[plName].id = fullPlaylist.id
+        state.playlists[plName].name = fullPlaylist.name
+        return state
+      })
+                    
+
       console.log(fullPlaylist.id)
       console.log(songNames)
       console.log(playlistNames)
@@ -348,32 +359,32 @@ export default class Spotify extends React.Component{
               <button onClick={this.publish}>Search</button>
             </div>
             <div>
-              <button onClick={(e)=> this.setPlaylist(e, 'foc')}>
+              <button onClick={()=> this.setPlaylist('foc')}>
                 Set As Focus Playlist
               </button>
             </div>
             <div>
-              <button onClick={(e)=> this.setPlaylist(e, 'eng')}>
+              <button onClick={()=> this.setPlaylist('eng')}>
                 Set as Eng Playlist
               </button>
             </div>
             <div>
-              <button onClick={(e)=> this.setPlaylist(e, 'exc')}>
+              <button onClick={()=> this.setPlaylist('exc')}>
                 Set as Exc Playlist
               </button>
             </div>
             <div>
-              <button onClick={(e)=> this.setPlaylist(e, 'str')}>
+              <button onClick={()=> this.setPlaylist('str')}>
                 Set as Str Playlist
               </button>
             </div>
             <div>
-              <button onClick={(e)=> this.setPlaylist(e, 'intt')}>
+              <button onClick={()=> this.setPlaylist('intt')}>
                 Set as Int Playlist
               </button>
             </div>
             <div>
-              <button onClick={(e)=> this.setPlaylist(e, 'rel')}>
+              <button onClick={()=> this.setPlaylist('rel')}>
                 Set as Rel Playlist
               </button>
             </div>

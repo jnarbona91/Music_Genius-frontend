@@ -9,19 +9,19 @@ export default class Cortex extends React.Component{
 
   constructor(props) {
     super(props);
-    this.token: ""; //storing cortext token for authentication
-    this.headset: ""; //storing the headset id
-    this.connected: false;
-    this.id_sequence: 1;  // sequence for websocket calls
-    this.callbacks: {};  // keys are id_sequence, values are callbacks
-    this.session_id: "";
-    this.session_connected: false;
-    this.all_streams: [ "met", "fac"];
-    this.metrics: {eng: 0, exc: 0, str: 0, rel: 0, intt: 0, foc: 0};
-    this.numSamples: 0;
-    this.prevEyeAction: "neutral";
-    this.prev2EyeAction: "neutral";
-    this.refWebSocket: null;
+    this.token = ""; //storing cortext token for authentication
+    this.headset = ""; //storing the headset id
+    this.connected = false;
+    this.id_sequence = 1;  // sequence for websocket calls
+    this.callbacks = {};  // keys are id_sequence, values are callbacks
+    this.session_id = "";
+    this.session_connected = false;
+    this.all_streams = [ "met", "fac"];
+    this.metrics = {eng: 0, exc: 0, str: 0, rel: 0, intt: 0, foc: 0};
+    this.numSamples = 0;
+    this.prevEyeAction = "neutral";
+    this.prev2EyeAction = "neutral";
+    this.refWebSocket = null;
     
     this.handleData = this.handleData.bind(this);
   }
@@ -103,7 +103,6 @@ export default class Cortex extends React.Component{
         "clientId": clientId,
         "clientSecret": clientSecret
       };
-    }
     this.sendMessage("authorize", params, this.authentication_callback);
   }
 
@@ -127,10 +126,8 @@ export default class Cortex extends React.Component{
     console.log("Running callback for queryHeadset()");
     console.log(data);
     if (data.result.length > 0){
-      this.headset = data.result[0].id
-    })
-        
-    console.log("[DEBUG] headset id is: " + this.headset);
+      this.headset = data.result[0].id;
+      console.log("[DEBUG] headset id is: " + this.headset);
     } else {
       this.headset = '';
       console.log("[DEBUG] no headsets found");
@@ -148,7 +145,6 @@ export default class Cortex extends React.Component{
         "command": "connect",
         "headset": this.headset
     };
-    console.log(msg);
     this.sendMessage("controlDevice", params, this.controlDevice_callback);
   }
 
@@ -312,10 +308,10 @@ export default class Cortex extends React.Component{
     // let relArray = [];
     // let intArray = [];
     // let focArray = [];
-    console.log(result);
+    //console.log(result);
     if (result.id){
       // call the registered callback
-      console.log("executing callback for id = " + result.id);
+      //console.log("executing callback for id = " + result.id);
       this.callbacks[result.id](result);
     }
     // if (this.state.connected === true && this.state.session_connected === true && result.met !== undefined){
@@ -351,7 +347,7 @@ export default class Cortex extends React.Component{
     //console.log(data);
     //update averages
     let indexes = {eng: 1, exc: 3, str: 6, rel: 8, intt: 10, foc: 12};
-    ['eng', 'exc', 'str', 'rel', 'intt', 'foc'].foreach((met) => {
+    ['eng', 'exc', 'str', 'rel', 'intt', 'foc'].forEach((met) => {
         let new_val = data[indexes[met]];
         let avg = (this.metrics[met] * this.numSamples + new_val) / 
             (this.numSamples + 1);
@@ -362,7 +358,7 @@ export default class Cortex extends React.Component{
         //skip, meaning in either case, play next song, then reset all averages
         //and sample count.
         if (avg > 0.6) {
-            let cmd = 'add' + met[0].toUpperCase() + met.slice(1);
+            let cmd = 'add' + met;
             this.tellSpotify(cmd);
         }
 
@@ -391,7 +387,7 @@ export default class Cortex extends React.Component{
 
   resetAvg() {
     this.metrics = {
-        eng: 0, exc: 0, str: 0, rel: 0, intt: 0, foc: 0, numSamples: 0});
+        eng: 0, exc: 0, str: 0, rel: 0, intt: 0, foc: 0, numSamples: 0};
   }
 
   tellSpotify = (command) => {
@@ -436,5 +432,5 @@ export default class Cortex extends React.Component{
            
             </div>
         )
-    };
-}
+    }
+  }
