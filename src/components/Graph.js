@@ -15,6 +15,7 @@ export default class Graph extends React.Component{
     this.drawBarChart = this.drawBarChart.bind(this);
   }
 
+
   componentDidMount(){  
     this.drawBarChart()
   }

@@ -22,12 +22,18 @@ export default class Spotify extends React.Component{
       error: null,
       timer: 0,
       search: "",
+      // int is a keyword, so I changed it to intt
+      // also I made each entry an object so we can store both name and ID
+      // TODO fix int to intt in other files??
+      playlists: {foc: {}, str: {}, eng: {}, exc: {}, intt: {}, rel: {}},
+      /*
       focPlaylist: "",
       strPlaylist: "",
       engPlaylist: "",
       excPlaylist: "",
       intPlaylist: "",
       relPlaylist: "",
+      */
     }
     this.getPlaying = this.getPlaying.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -37,6 +43,12 @@ export default class Spotify extends React.Component{
   handleCortexCommand(command){
     console.log("[Spotify] received message: " + command)
 
+    if(command.startsWith('add')) { 
+        let plName = command.substring(3);  //strip the add
+        console.log("adding to pl " + plName);
+        this.addPlaylist(plName);
+    }
+    /* MSB: No longer needed
     if (command === "addExc"){
       this.excPlaylist();
     } 
@@ -55,6 +67,15 @@ export default class Spotify extends React.Component{
     if (command === "addRel"){
       this.relPlaylist();
     }
+    */
+    else if (command === "skip"){  // MSB: note added "else" to make it faster
+      this.skipSong();
+    }
+  }
+
+  tellCortex = (command) => {
+    console.log("[Spotify] sending: " + command)
+    this.props.parentCallback(command);
   }
 
   //returns both request and access tokens
@@ -95,6 +116,36 @@ export default class Spotify extends React.Component{
     .catch((error)=> this.setState({error}))
   }
 
+  setPlaylist(plName){
+    console.log("plName = ",plName);
+    console.log("playlist object = " + this.state.playlists[plName]);
+    spotifyApi.getUserPlaylists(this.state.userId, {limit: 50})
+    .then((resp)=>{
+      console.log(resp.items)
+      let songNames = resp.items.map(function(item) {
+          return { name: item.name }
+      });
+      let playlistNames = songNames.find(e => e.name === this.state.search)
+      let fullPlaylist = resp.items.find(e => e.name === this.state.search)
+      // this.setState({playlists[plName]:
+      //                {id: fullPlaylist.id, name: fullPlaylist.name}});
+
+      this.setState(state => {
+        state.playlists[plName].id = fullPlaylist.id
+        state.playlists[plName].name = fullPlaylist.name
+        return state
+      })
+                    
+
+      console.log(fullPlaylist.id)
+      console.log(songNames)
+      console.log(playlistNames)
+      console.log(this.state.search)
+      return resp
+    })
+  }
+
+  /* MSB: No longer needed
   setFocPlaylist(){
     spotifyApi.getUserPlaylists(this.state.userId, {limit: 50})
     .then((resp)=>{
@@ -117,6 +168,7 @@ export default class Spotify extends React.Component{
       let songNames = resp.items.map(function(item) { return { name: item.name }})
       let playlistNames = songNames.find(e => e.name === this.state.search)
       let fullPlaylist = resp.items.find(e => e.name === this.state.search)
+      console.log("setting exc playlist to " + fullPlaylist.name);
       this.setState({excPlaylist: fullPlaylist.id})
       return resp
     })
@@ -165,14 +217,17 @@ export default class Spotify extends React.Component{
       return resp
     })
   }
+  */
 
   skipSong(){
     spotifyApi.skipToNext();
-    this.getPlaying();
+    this.tellCortex("reset");
+    return this.getPlaying();
   }
 
   prevSong(){ 
     spotifyApi.skipToPrevious();
+    this.tellCortex("reset");
       return this.getPlaying();
   }
 
@@ -191,6 +246,14 @@ export default class Spotify extends React.Component{
     console.log("doing some spotify playlist add stuff...")
   }
 
+  addPlaylist(plName) {
+      console.log("Adding to ", plName, "playlist: ",
+                  this.state.playlists[plName].name);
+      return spotifyApi.addTracksToPlaylist(this.state.playlists[plName].id,
+                                            [this.state.nowPlaying.uri]);
+  }
+
+  /* MSB: no longer needed
   excPlaylist(){
       return spotifyApi.addTracksToPlaylist(this.state.excPlaylist,  [this.state.nowPlaying.uri]);
   }
@@ -214,6 +277,7 @@ export default class Spotify extends React.Component{
   focPlaylist(){
       return spotifyApi.addTracksToPlaylist(this.state.focPlaylist,  [this.state.nowPlaying.uri]);
   }
+  */
 
   createNewPlaylist(userId = this.state.userId, playListName=this.state.search){
     spotifyApi.createPlaylist(userId, { name: playListName})
@@ -222,7 +286,7 @@ export default class Spotify extends React.Component{
     })
     .catch((error)=> this.setState({error}))
   }
-
+  
   getUserId(){
     spotifyApi.getMe()
     .then((resp)=>{
@@ -295,32 +359,32 @@ export default class Spotify extends React.Component{
               <button onClick={this.publish}>Search</button>
             </div>
             <div>
-              <button onClick={()=> this.setFocPlaylist()}>
+              <button onClick={()=> this.setPlaylist('foc')}>
                 Set As Focus Playlist
               </button>
             </div>
             <div>
-              <button onClick={()=> this.setEngPlaylist()}>
+              <button onClick={()=> this.setPlaylist('eng')}>
                 Set as Eng Playlist
               </button>
             </div>
             <div>
-              <button onClick={()=> this.setExcPlaylist()}>
+              <button onClick={()=> this.setPlaylist('exc')}>
                 Set as Exc Playlist
               </button>
             </div>
             <div>
-              <button onClick={()=> this.setStrPlaylist()}>
+              <button onClick={()=> this.setPlaylist('str')}>
                 Set as Str Playlist
               </button>
             </div>
             <div>
-              <button onClick={()=> this.setIntPlaylist()}>
+              <button onClick={()=> this.setPlaylist('intt')}>
                 Set as Int Playlist
               </button>
             </div>
             <div>
-              <button onClick={()=> this.setRelPlaylist()}>
+              <button onClick={()=> this.setPlaylist('rel')}>
                 Set as Rel Playlist
               </button>
             </div>
