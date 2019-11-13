@@ -357,7 +357,7 @@ export default class Cortex extends React.Component{
         //current song to playlist, if average goes below low threshold, skip
         //skip, meaning in either case, play next song, then reset all averages
         //and sample count.
-        if (avg > 0.6) {
+        if (avg > 0.6 && this.numSamples > 25) {
             let cmd = 'add' + met;
             this.tellSpotify(cmd);
         }
