@@ -249,6 +249,10 @@ export default class Spotify extends React.Component{
   addPlaylist(plName) {
       console.log("Adding to ", plName, "playlist: ",
                   this.state.playlists[plName].name);
+      if(this.state.playlists[plName] === null) { 
+        console.log("No playlist set for ", plName);
+        return;
+      }
       return spotifyApi.addTracksToPlaylist(this.state.playlists[plName].id,
                                             [this.state.nowPlaying.uri]);
   }

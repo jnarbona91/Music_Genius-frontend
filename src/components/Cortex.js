@@ -22,6 +22,7 @@ export default class Cortex extends React.Component{
     this.prevEyeAction = "neutral";
     this.prev2EyeAction = "neutral";
     this.refWebSocket = null;
+    this.inPlaylist = [];
     
     this.handleData = this.handleData.bind(this);
   }
@@ -357,10 +358,15 @@ export default class Cortex extends React.Component{
         //current song to playlist, if average goes below low threshold, skip
         //skip, meaning in either case, play next song, then reset all averages
         //and sample count.
-        if (avg > 0.6 && this.numSamples > 25) {
+        // console.log("Checking ", met, ": avg ", avg, " samples ", this.numSamples);
+        if (avg > 0.1 && this.numSamples > 5 && this.inPlaylist.indexOf(met) === -1)
+         {
             let cmd = 'add' + met;
             this.tellSpotify(cmd);
+            this.inPlaylist.push(met);
+            console.log("adding " + met + " to playlist");
         }
+    
 
         console.log(met, " = ", avg);
     });
@@ -388,6 +394,7 @@ export default class Cortex extends React.Component{
   resetAvg() {
     this.metrics = {
         eng: 0, exc: 0, str: 0, rel: 0, intt: 0, foc: 0, numSamples: 0};
+    this.inPlaylist = []; 
   }
 
   tellSpotify = (command) => {

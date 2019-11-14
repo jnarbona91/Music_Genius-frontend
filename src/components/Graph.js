@@ -14,9 +14,10 @@ export default class Graph extends React.Component{
     this.drawBarChart()
   }
 
-  componentDidUpdate(){
+  componentDidUpdate(prevProps){
     d3.selectAll('svg').remove()
     this.drawBarChart()
+    console.log(prevProps)
   }
 
   drawBarChart(){
