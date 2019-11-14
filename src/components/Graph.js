@@ -53,6 +53,7 @@ export default class Graph extends React.Component{
       .append("svg")
       .attr("width", 500)
       .attr("height", 200)
+      .attr('preserveAspectRatio','xMinYMin')
 
     const xScale = d3.scaleBand()
       .range([0, 500])
