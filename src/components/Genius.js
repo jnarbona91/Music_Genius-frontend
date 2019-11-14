@@ -29,7 +29,7 @@ export default class Genius extends React.Component{
     }
 
     graphCallback = (engVal, excVal, strVal, relVal, intVal, focVal) => {
-        this.setState({ eng: engVal*100, exc: excVal*100, str: strVal*100, rel: relVal*100, int: intVal*100, foc: focVal*100 })
+        this.setState({ eng: engVal, exc: excVal, str: strVal, rel: relVal, int: intVal, foc: focVal })
     }
 
     render() {

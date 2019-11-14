@@ -22,6 +22,7 @@ export default class Cortex extends React.Component{
     this.prevEyeAction = "neutral";
     this.prev2EyeAction = "neutral";
     this.refWebSocket = null;
+    this.inPlaylist = [];
     
     this.handleData = this.handleData.bind(this);
   }
@@ -205,6 +206,7 @@ export default class Cortex extends React.Component{
       console.log(`Session id is ${this.session_id}`);
       this.subscribe();
     }
+    this.getUserLogin();
     delete this.callbacks[data.id];
   }
 
@@ -249,7 +251,9 @@ export default class Cortex extends React.Component{
     console.log(data);
     this.session_connected = false;
     delete this.callbacks[data.id];
+    this.disconnectHeadset();
     this.unsubscribe();
+
   }
 
   // streams has default value of all streams; if user does not specify streams, all_streams will be subscribed
@@ -357,10 +361,15 @@ export default class Cortex extends React.Component{
         //current song to playlist, if average goes below low threshold, skip
         //skip, meaning in either case, play next song, then reset all averages
         //and sample count.
-        if (avg > 0.6 && this.numSamples > 25) {
+        // console.log("Checking ", met, ": avg ", avg, " samples ", this.numSamples);
+        if (avg > 0.1 && this.numSamples > 5 && this.inPlaylist.indexOf(met) === -1)
+         {
             let cmd = 'add' + met;
             this.tellSpotify(cmd);
+            this.inPlaylist.push(met);
+            console.log("adding " + met + " to playlist");
         }
+    
 
         console.log(met, " = ", avg);
     });
@@ -388,6 +397,7 @@ export default class Cortex extends React.Component{
   resetAvg() {
     this.metrics = {
         eng: 0, exc: 0, str: 0, rel: 0, intt: 0, foc: 0, numSamples: 0};
+    this.inPlaylist = []; 
   }
 
   tellSpotify = (command) => {
@@ -410,7 +420,7 @@ export default class Cortex extends React.Component{
             />
              {/* this is just for test connecting to api
              <Button onClick={() => this.sendHello()}>Get Info</Button> */}
-             <Button onClick={() => this.getUserLogin()}>Connect Headset</Button>
+             {/* <Button onClick={() => this.getUserLogin()}>Connect Headset</Button> */}
              {/* <Button onClick={() => this.getRequestAccess()}>Request Access</Button>
              <Button onClick={() => this.getAuthentication()}>Authorize</Button>
              <br>
@@ -421,14 +431,14 @@ export default class Cortex extends React.Component{
              </br> */}
 
              {/* <Button onClick={() => this.connectHeadset()}>Connect Headset</Button> */}
-             <Button onClick={() => this.disconnectHeadset()}>Disconnect Headset</Button>
+             {/* <Button onClick={() => this.disconnectHeadset()}>Disconnect Headset</Button> */}
             <br>
             </br>
             <Button onClick={() => this.startSession()}>Start Session</Button>
             <Button onClick={() => this.closeSession()}>End Session</Button>
-            <Button onClick={() => this.tellSpotify("addExc")}>Tell spotify to add</Button>
+            {/* <Button onClick={() => this.tellSpotify("addExc")}>Tell spotify to add</Button>
             <Button onClick={() => this.tellSpotify("skip")}>Tell spotify to skip</Button>
-            <Button onClick={() => this.getDetectionInfo()}>Get trained facial command</Button>
+            <Button onClick={() => this.getDetectionInfo()}>Get trained facial command</Button> */}
            
             </div>
         )
