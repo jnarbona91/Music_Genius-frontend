@@ -21,6 +21,8 @@ export default class Graph extends React.Component{
   }
 
   drawBarChart(){
+    const colorScale = d3.scaleOrdinal(["#158E9C", "#159C40", "#003A68", "#D68C0A", 
+    "#410E6B", "#9C1515"]);
     const { eng, exc, int, rel, foc, str } = this.props
     let performance = [
       {
@@ -52,6 +54,7 @@ export default class Graph extends React.Component{
       .append("svg")
       .attr("width", 500)
       .attr("height", 200)
+      .attr('preserveAspectRatio','xMinYMin')
 
     const xScale = d3.scaleBand()
       .range([0, 500])
@@ -77,12 +80,24 @@ export default class Graph extends React.Component{
       .selectAll('text')
       .attr("transform", "translate(0, 0)rotate(0)")
     
+    const yGridlines = d3.axisLeft()
+      .scale(yScale)
+      .ticks(9)
+      .tickSize(-480,0)
+      .tickFormat('')
+  
+    svgGraph.append('g')
+      .attr('opacity', 0.3)
+      .attr('transform', 'translate(25, 10)')
+      .call(yGridlines)
+      .classed('gridline')
+    
     svgGraph.selectAll("rect")
       .data(performance).enter()
         .append("rect")
         .attr("width", 15)
         .attr("height", (d) => yScale(0) -yScale(d.data))
-        .attr("fill", "gray")
+        .attr("fill", (d, i)=> colorScale(i))
         .attr("x", d => xScale(d.label))
         .attr("y", d => yScale(d.data))
         .attr('transform', 'translate(17, 10)')

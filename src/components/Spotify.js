@@ -220,15 +220,17 @@ export default class Spotify extends React.Component{
   */
 
   skipSong(){
-    spotifyApi.skipToNext();
+    spotifyApi.skipToNext()
+    .then(()=>{
+      this.getPlaying()
+    })
     this.tellCortex("reset");
-    return this.getPlaying();
   }
 
   prevSong(){ 
     spotifyApi.skipToPrevious();
     this.tellCortex("reset");
-      return this.getPlaying();
+    return this.getPlaying();
   }
 
   addSongToPlaylist(){
@@ -303,7 +305,7 @@ export default class Spotify extends React.Component{
   }
 
   playlistTracks(){
-    spotifyApi.getPlaylistTracks("5TOheLold9VEiIUcljAQlK")
+    spotifyApi.getPlaylistTracks(this.state.playLists)
     .then((resp)=>{
       resp.items.map((song)=>{
         return this.state.playlistSongs.push(song.track.name)
