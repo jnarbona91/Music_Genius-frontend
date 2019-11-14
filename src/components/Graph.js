@@ -21,54 +21,80 @@ export default class Graph extends React.Component{
 
   drawBarChart(){
     const { eng, exc, int, rel, foc, str } = this.props
-    let performance = [eng, exc, int, rel, foc, str]
+    let performance = [
+      {
+       label: 'eng',
+       data:   eng       
+      },
+      {
+        label: 'exc',
+        data:   exc       
+       },
+       {
+        label: 'int',
+        data:   int       
+       },
+       {
+        label: 'rel',
+        data:   rel      
+       },
+       {
+        label: 'foc',
+        data:   foc       
+       },
+       {
+        label: 'str',
+        data:   str       
+       },
+    ]
     const svgGraph = d3.select(this.refs.graph)
       .append("svg")
       .attr("width", 500)
-      .attr("height", 170)
-      
+      .attr("height", 200)
 
     const xScale = d3.scaleBand()
-      .range([60, 480])
-      .domain(["eng", "exc", "int", "rel", "foc", 'str'])
+      .range([0, 500])
+      .domain(performance.map(d => d.label))
       .padding(1)
 
     svgGraph.append('g')
       .attr('class', 'axis x')
-      .attr('transform', 'translate(0,' + (150) + ')')
+      .attr('transform', 'translate(25, 160)')
       .call(d3.axisBottom(xScale))
       .selectAll('text')
       .attr('dy', null)
       .attr("transform", "translate(0, 10)")  
       
     const yScale = d3.scaleLinear()
-      .range([150, 10])
+      .range([150, 0])
       .domain([0, 1.0])
    
     svgGraph.append('g')
       .attr('class', 'axis y')
-      .call(d3.axisRight(yScale))
+      .attr('transform', 'translate(25, 10)')
+      .call(d3.axisLeft(yScale))
       .selectAll('text')
-      .attr("transform", "translate(20, 0)rotate(0)")
-    
+      .attr("transform", "translate(0, 0)rotate(0)")
     
     svgGraph.selectAll("rect")
       .data(performance).enter()
         .append("rect")
         .attr("width", 15)
-        .attr("height", (performance) => performance * 100)
+        .attr("height", (d) => yScale(0) -yScale(d.data))
         .attr("fill", "gray")
-        .attr("x", performance => xScale(performance))
-        .attr("y", (performance) => 150 - performance  ) 
+        .attr("x", d => xScale(d.label))
+        .attr("y", d => yScale(d.data))
+        .attr('transform', 'translate(17, 10)')
     svgGraph.selectAll('rect')
       .data(performance).exit().remove()
+      console.log(performance)
   }
 
   render(){
     return(
       <div>
       <center>
-      <h1>The Graph Will Go Here</h1>
+      <h1>Performance Graph</h1>
       <div ref="graph"></div>
       </center>
       </div>
