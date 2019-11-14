@@ -206,6 +206,7 @@ export default class Cortex extends React.Component{
       console.log(`Session id is ${this.session_id}`);
       this.subscribe();
     }
+    this.getUserLogin();
     delete this.callbacks[data.id];
   }
 
@@ -250,7 +251,9 @@ export default class Cortex extends React.Component{
     console.log(data);
     this.session_connected = false;
     delete this.callbacks[data.id];
+    this.disconnectHeadset();
     this.unsubscribe();
+
   }
 
   // streams has default value of all streams; if user does not specify streams, all_streams will be subscribed
@@ -417,7 +420,7 @@ export default class Cortex extends React.Component{
             />
              {/* this is just for test connecting to api
              <Button onClick={() => this.sendHello()}>Get Info</Button> */}
-             <Button onClick={() => this.getUserLogin()}>Connect Headset</Button>
+             {/* <Button onClick={() => this.getUserLogin()}>Connect Headset</Button> */}
              {/* <Button onClick={() => this.getRequestAccess()}>Request Access</Button>
              <Button onClick={() => this.getAuthentication()}>Authorize</Button>
              <br>
@@ -428,14 +431,14 @@ export default class Cortex extends React.Component{
              </br> */}
 
              {/* <Button onClick={() => this.connectHeadset()}>Connect Headset</Button> */}
-             <Button onClick={() => this.disconnectHeadset()}>Disconnect Headset</Button>
+             {/* <Button onClick={() => this.disconnectHeadset()}>Disconnect Headset</Button> */}
             <br>
             </br>
             <Button onClick={() => this.startSession()}>Start Session</Button>
             <Button onClick={() => this.closeSession()}>End Session</Button>
-            <Button onClick={() => this.tellSpotify("addExc")}>Tell spotify to add</Button>
+            {/* <Button onClick={() => this.tellSpotify("addExc")}>Tell spotify to add</Button>
             <Button onClick={() => this.tellSpotify("skip")}>Tell spotify to skip</Button>
-            <Button onClick={() => this.getDetectionInfo()}>Get trained facial command</Button>
+            <Button onClick={() => this.getDetectionInfo()}>Get trained facial command</Button> */}
            
             </div>
         )
