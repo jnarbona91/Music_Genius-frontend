@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Genius from './components/Genius';
 // import Login from './components/Login';
-import styled from "styled-components";
+// import styled from "styled-components";
 import './App.css';
 import {
     Navbar,
