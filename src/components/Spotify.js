@@ -35,6 +35,8 @@ export default class Spotify extends React.Component{
       relPlaylist: "",
       */
     }
+    this.alerts = [];
+
     this.getPlaying = this.getPlaying.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.publish = this.publish.bind(this);
@@ -220,6 +222,7 @@ export default class Spotify extends React.Component{
   */
 
   skipSong(){
+
     spotifyApi.skipToNext()
     .then(()=>{
       this.getPlaying()
