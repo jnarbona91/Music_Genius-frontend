@@ -110,7 +110,7 @@ export default class Graph extends React.Component{
     return(
       <div>
       <center>
-      <h1>Performance Graph</h1>
+      {/* <h1>Performance Graph</h1> */}
       <div ref="graph"></div>
       </center>
       </div>
