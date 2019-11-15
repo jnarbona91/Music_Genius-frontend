@@ -1,7 +1,7 @@
 import React from 'react'
 import * as d3 from 'd3'
-import { updateExpression } from '@babel/types';
-import { selector } from 'postcss-selector-parser';
+// import { updateExpression } from '@babel/types';
+// import { selector } from 'postcss-selector-parser';
 
 export default class Graph extends React.Component{
   constructor(props){
@@ -94,7 +94,7 @@ export default class Graph extends React.Component{
     return(
       <div>
       <center>
-      <h1>Performance Graph</h1>
+      {/* <h1>Performance Graph</h1> */}
       <div ref="graph"></div>
       </center>
       </div>

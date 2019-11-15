@@ -395,6 +395,16 @@ export default class Cortex extends React.Component{
       this.props.parentCallback(command);
   }
 
+  getStarted() {
+    this.getUserLogin();
+    this.startSession();
+  }
+
+  userFinished() {
+    this.disconnectHeadset();
+    this.closeSession();
+  }
+
   render() {
     return (
             <div>
@@ -408,28 +418,10 @@ export default class Cortex extends React.Component{
                 this.refWebSocket = Websocket;
             }}
             />
-             {/* this is just for test connecting to api
-             <Button onClick={() => this.sendHello()}>Get Info</Button> */}
-             <Button onClick={() => this.getUserLogin()}>Connect Headset</Button>
-             {/* <Button onClick={() => this.getRequestAccess()}>Request Access</Button>
-             <Button onClick={() => this.getAuthentication()}>Authorize</Button>
-             <br>
-             </br>
 
-             <Button onClick={() => this.queryHeadsets()}>Find Headset</Button>
-             <br>
-             </br> */}
-
-             {/* <Button onClick={() => this.connectHeadset()}>Connect Headset</Button> */}
-             <Button onClick={() => this.disconnectHeadset()}>Disconnect Headset</Button>
-            <br>
-            </br>
-            <Button onClick={() => this.startSession()}>Start Session</Button>
-            <Button onClick={() => this.closeSession()}>End Session</Button>
-            <Button onClick={() => this.tellSpotify("addExc")}>Tell spotify to add</Button>
-            <Button onClick={() => this.tellSpotify("skip")}>Tell spotify to skip</Button>
-            <Button onClick={() => this.getDetectionInfo()}>Get trained facial command</Button>
-           
+             <Button className="btn" onClick={() => this.getStarted()}>Connect Headset</Button>
+             <Button className="btn" onClick={() => this.userFinished()}>Disconnect Headset</Button>
+   
             </div>
         )
     }

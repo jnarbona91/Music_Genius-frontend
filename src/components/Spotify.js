@@ -13,7 +13,7 @@ export default class Spotify extends React.Component{
     this.interval = null;
     this.state = {
       loggedIn: token ? true : false,
-      nowPlaying: { name: 'Not Checked', albumArt: '', uri: '' },
+      nowPlaying: { name: 'Welcome to Music Genius', albumArt: '', uri: '' },
       userId: "",
       playlistId: "",
       currentPlaylist: "",
@@ -322,17 +322,25 @@ export default class Spotify extends React.Component{
   publish(){
     console.log(this.state.search)
   }
+
+  addDefaultSrc(ev){
+    ev.target.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/1024px-Spotify_logo_without_text.svg.png'
+  }
+
   
   render(){
     return(
       <div className="spotify-div">
         <div>
-          <a href="http://localhost:8888">Link to Spotify</a>
-          <div>{this.state.nowPlaying.name}</div>
-          <img alt="album art" src={this.state.nowPlaying.albumArt} style={{height: '150px', width: '150px'}}/>
+          <img onError={this.addDefaultSrc} alt="album art" src={this.state.nowPlaying.albumArt} style={{height: '150px', width: '150px'}}/>
+
+          {/* <a href="http://localhost:8888">Link to Spotify</a> */}
+          <br/><br/>
+          <p>{this.state.nowPlaying.name}</p>
+
         </div>
         <div>
-        { this.state.loggedIn &&
+        {/* { this.state.loggedIn &&
           <div>
             <div>
               <button onClick={() => this.getPlaying()}>
@@ -388,9 +396,9 @@ export default class Spotify extends React.Component{
                 Set as Rel Playlist
               </button>
             </div>
-          </div>
+          </div> */}
 
-        }
+        
         </div>
         {/* {this.handleCortexCommand(this.props.dataFromCortex)} */}
       </div>
