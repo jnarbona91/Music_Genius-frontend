@@ -1,6 +1,7 @@
 import React from "react";
 import Websocket from "react-websocket";
 import { Button } from "reactstrap"
+import swal from 'sweetalert'
 
 
 var clientId = "zrTtgE4m4XN2z74UC5wRXOMEfqqtT20glr0rJf08";
@@ -174,6 +175,7 @@ export default class Cortex extends React.Component{
       if (data.result.command === "connect"){
         console.log("connected!!!");
         this.connected = true;
+        this.startSession();
       }else if (data.result.command === "disconnect"){
         console.log("disconnected. :(");
         this.connected = false;
@@ -204,9 +206,8 @@ export default class Cortex extends React.Component{
       this.session_id = data.result.id;
       this.session_connected = true;
       console.log(`Session id is ${this.session_id}`);
-      this.subscribe();
+      this.subscribe();    
     }
-    this.getUserLogin();
     delete this.callbacks[data.id];
   }
 
@@ -258,14 +259,15 @@ export default class Cortex extends React.Component{
 
   // streams has default value of all streams; if user does not specify streams, all_streams will be subscribed
   subscribe(streams = this.all_streams){
-    if (this.connected === true && this.session_connected === true){
+    console.log("subscribing");
+    //if (this.connected === true && this.session_connected === true){
       let params = {
           "cortexToken": this.token,
           "session": this.session_id,
           "streams": streams
       };
       this.sendMessage("subscribe", params, this.subscribe_callback);
-    }
+    //}
   }
 
   subscribe_callback = (data) => {
@@ -350,6 +352,8 @@ export default class Cortex extends React.Component{
   handleMetData(data){
     //console.log(data);
     //update averages
+    let playlistsToAdd = [];
+
     let indexes = {eng: 1, exc: 3, str: 6, rel: 8, intt: 10, foc: 12};
     ['eng', 'exc', 'str', 'rel', 'intt', 'foc'].forEach((met) => {
         let new_val = data[indexes[met]];
@@ -362,17 +366,25 @@ export default class Cortex extends React.Component{
         //skip, meaning in either case, play next song, then reset all averages
         //and sample count.
         // console.log("Checking ", met, ": avg ", avg, " samples ", this.numSamples);
-        if (avg > 0.1 && this.numSamples > 5 && this.inPlaylist.indexOf(met) === -1)
+        if (avg > 0.4 && this.numSamples > 2 && this.inPlaylist.indexOf(met) === -1)
          {
             let cmd = 'add' + met;
             this.tellSpotify(cmd);
             this.inPlaylist.push(met);
             console.log("adding " + met + " to playlist");
-        }
-    
+            playlistsToAdd.push(met);
+         }
 
         console.log(met, " = ", avg);
     });
+
+    console.log("playlists");
+    console.log(playlistsToAdd);
+
+    if (playlistsToAdd.length > 0){
+      swal("Current song has been added to playlists:", playlistsToAdd.toString(), "success");
+    }
+
     this.numSamples += 1;
 
     // need to store the current average and number of samples in state for next
@@ -396,7 +408,8 @@ export default class Cortex extends React.Component{
 
   resetAvg() {
     this.metrics = {
-        eng: 0, exc: 0, str: 0, rel: 0, intt: 0, foc: 0, numSamples: 0};
+        eng: 0, exc: 0, str: 0, rel: 0, intt: 0, foc: 0};
+    this.numSamples = 0;
     this.inPlaylist = []; 
   }
 
@@ -420,7 +433,7 @@ export default class Cortex extends React.Component{
             />
              {/* this is just for test connecting to api
              <Button onClick={() => this.sendHello()}>Get Info</Button> */}
-             {/* <Button onClick={() => this.getUserLogin()}>Connect Headset</Button> */}
+             <Button onClick={() => this.getUserLogin()}>Start Session</Button>
              {/* <Button onClick={() => this.getRequestAccess()}>Request Access</Button>
              <Button onClick={() => this.getAuthentication()}>Authorize</Button>
              <br>
@@ -432,9 +445,7 @@ export default class Cortex extends React.Component{
 
              {/* <Button onClick={() => this.connectHeadset()}>Connect Headset</Button> */}
              {/* <Button onClick={() => this.disconnectHeadset()}>Disconnect Headset</Button> */}
-            <br>
-            </br>
-            <Button onClick={() => this.startSession()}>Start Session</Button>
+            {/* <Button onClick={() => this.startSession()}>Start Session</Button> */}
             <Button onClick={() => this.closeSession()}>End Session</Button>
             {/* <Button onClick={() => this.tellSpotify("addExc")}>Tell spotify to add</Button>
             <Button onClick={() => this.tellSpotify("skip")}>Tell spotify to skip</Button>

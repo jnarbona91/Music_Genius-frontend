@@ -5,7 +5,7 @@ import './App.css';
 function App() {
   return (
     <div>
-      <h1>MegaBrain</h1>
+      <h1>Music Genius</h1>
       <Genius />
     </div>
   );
